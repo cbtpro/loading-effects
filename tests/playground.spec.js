@@ -1,47 +1,38 @@
 import { expect, test } from '@playwright/test';
 
-test('right sidebar marks the current group with a dashed SVG and follows scrolling', async ({ page }) => {
+test('right sidebar shows both levels and moves one indicator to the current link', async ({ page }) => {
   await page.goto('/');
   const nav = page.getByRole('navigation', { name: '动效分类' });
-  const current = nav.locator('.nav-group-link[data-active]');
-  const currentEffect = nav.locator('[aria-current="location"]');
-  await expect(nav.locator('.nav-group-link')).toHaveCount(7);
-  await expect(currentEffect).toHaveText('点阵波浪');
-  await expect(current).toHaveText(/点阵与波纹/);
-  const marker = nav.locator('.nav-range');
-  await expect(marker).toBeVisible();
-  await expect(marker.locator('path')).toHaveAttribute('stroke-dasharray', /\S/);
+  const current = nav.locator('[aria-current="location"]');
+  const indicator = nav.locator('.nav-indicator');
+  await expect(nav.getByRole('link')).toHaveCount(45);
+  await expect(indicator).toBeVisible();
   const sidebar = await nav.boundingBox();
   const preview = await page.locator('#dot-matrix-wave').boundingBox();
   expect(sidebar.x).toBeGreaterThan(preview.x + preview.width);
 
-  await nav.getByRole('link', { name: '基础几何' }).click();
-  await expect(page).toHaveURL(/#geometry-effects$/);
-  await expect(current).toHaveText(/基础几何/);
-  expect((await nav.boundingBox()).y).toBeCloseTo(16);
+  await nav.getByRole('link', { name: '粒子系统', exact: true }).click();
+  await expect(page).toHaveURL(/#particle-effects$/);
+  await expect(current).toHaveText('粒子系统');
 
-  await page.locator('#particle-effects').evaluate(section => section.scrollIntoView());
-  await expect(current).toHaveText(/粒子系统/);
-  await expect(nav.locator('[aria-current]')).toHaveCount(1);
-  const previous = await nav.getByRole('link', { name: '进度反馈' }).boundingBox();
-  const next = await nav.getByRole('link', { name: '骨架占位' }).boundingBox();
-  await expect.poll(async () => Math.round((await marker.boundingBox()).y)).toBe(Math.round(previous.y + 3));
-  await expect.poll(async () => {
-    const range = await marker.boundingBox();
-    return Math.round(range.y + range.height);
-  }).toBe(Math.round(next.y + next.height - 3));
-  const dashOffset = () => marker.locator('path').evaluate(path => getComputedStyle(path).strokeDashoffset);
-  const phase = await dashOffset();
-  await page.evaluate(() => window.scrollBy(0, 11));
-  await expect.poll(dashOffset).not.toBe(phase);
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect.poll(dashOffset).toBe('0px');
-  const particleLinks = nav.getByRole('list', { name: '粒子系统' });
-  await particleLinks.getByRole('link', { name: '粒子网络' }).click();
+  await nav.getByRole('link', { name: '粒子网络', exact: true }).click();
   await expect(page).toHaveURL(/#particle-network$/);
-  await expect(currentEffect).toHaveText('粒子网络');
-  await page.locator('#particle-flow').evaluate(card => card.scrollIntoView());
-  await expect(currentEffect).toHaveText('粒子流');
+  await expect(current).toHaveText('粒子网络');
+  await expect.poll(async () => {
+    const link = await current.boundingBox();
+    const mark = await indicator.boundingBox();
+    return [Math.round(mark.y - link.y), Math.round(mark.height - link.height)];
+  }).toEqual([0, 0]);
+
+  await page.locator('#particle-flow').evaluate(card => {
+    window.scrollBy(0, card.getBoundingClientRect().top - window.innerHeight / 2 + 4);
+  });
+  await expect(current).toHaveText('粒子流');
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const lastEffect = page.locator('.effect-card h3').last();
+  await expect(current).toHaveText(await lastEffect.textContent());
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(indicator).toHaveCSS('transition-duration', '0s');
 });
 
 test('narrow view keeps category links accessible without covering anchor targets', async ({ page }) => {
@@ -54,6 +45,7 @@ test('narrow view keeps category links accessible without covering anchor target
   await expect(currentEffect).toHaveText('粒子网络');
   await nav.getByRole('link', { name: '基础几何' }).click();
   await expect(current).toHaveText(/基础几何/);
+  await expect(currentEffect).toHaveText('基础几何');
   const heading = await page.getByRole('heading', { name: '基础几何' }).boundingBox();
   const menu = await nav.boundingBox();
   expect(heading.y).toBeGreaterThan(menu.y + menu.height);

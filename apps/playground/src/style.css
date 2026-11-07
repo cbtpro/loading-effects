@@ -47,7 +47,7 @@ h3 { margin: 0; font-size: 1.0625rem; }
 .nav-track::before {
   content: "";
   position: absolute;
-  inset-block: 3px;
+  inset-block: 0;
   left: 2.5px;
   width: 1px;
   background: #ccd7e7;
@@ -69,34 +69,24 @@ h3 { margin: 0; font-size: 1.0625rem; }
 .group-nav a:hover, .group-nav a[aria-current], .nav-group-link[data-active] { color: #2359be; }
 .group-nav a:focus-visible { outline-offset: -2px; }
 .group-nav a[aria-current], .nav-group-link[data-active] { font-weight: 650; }
-.nav-effects { margin-left: 16px; border-left: 1px solid #ccd7e7; }
 .nav-effects a {
   min-height: 28px;
-  padding-left: 10px;
+  padding-left: 30px;
   font-size: .75rem;
   white-space: normal;
 }
-.nav-effects a[aria-current]::before {
-  content: "";
-  position: absolute;
-  inset-block: 4px;
-  left: -1px;
-  width: 2px;
-  border-radius: 2px;
-  background: currentColor;
-}
 .nav-mobile-effects { display: none; }
-.nav-range {
+.nav-indicator {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 2px;
+  width: 2px;
   height: 0;
-  transform: translateY(var(--range-top, 0px));
-  transition: transform 220ms ease-out, height 220ms ease-out;
+  background: #2359be;
+  transform: translateY(var(--indicator-top, 0px));
+  transition: transform 200ms ease-out, height 200ms ease-out;
   pointer-events: none;
-  color: #2359be;
 }
-.nav-range path { stroke-dashoffset: var(--dash-offset, 0); }
 
 #effects { grid-area: effects; min-width: 0; }
 .effect-group, .effect-card { scroll-margin-top: 16px; }
@@ -197,8 +187,7 @@ output { font-variant-numeric: tabular-nums; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 @media (max-width: 600px) { .settings-grid { grid-template-columns: minmax(0, 1fr); gap: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .leaving, .nav-range, .group-nav a { transition: none; }
-  .nav-range path { stroke-dashoffset: 0; }
+  .leaving, .nav-indicator, .group-nav a { transition: none; }
 }
 
 .code-toolbar, .code-choices {
@@ -251,13 +240,12 @@ output { font-variant-numeric: tabular-nums; }
     padding-top: 16px;
   }
   .group-nav { top: 0; max-height: none; padding: 4px; border: 1px solid #d8e1ee; border-radius: 12px; background: #fff; }
-  .nav-heading, .nav-track::before, .nav-range { display: none; }
+  .nav-heading, .nav-track::before, .nav-indicator { display: none; }
   .group-nav a { min-height: 34px; padding-inline: 8px; border-radius: 6px; white-space: nowrap; }
   .group-nav a[aria-current], .nav-group-link[data-active] { background: #eaf2ff; }
   .nav-list, .nav-effects { display: flex; overflow-x: auto; scrollbar-width: thin; }
   .nav-list li, .nav-effects li { flex: none; }
   .nav-mobile-effects { display: block; border-top: 1px solid #d8e1ee; margin-top: 3px; padding-top: 3px; }
-  .nav-effects { margin: 0; border: 0; }
-  .nav-effects a[aria-current]::before { display: none; }
+  .nav-list .nav-effects { display: none; }
   .effect-group, .effect-card { scroll-margin-top: 102px; }
 }
