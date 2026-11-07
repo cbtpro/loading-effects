@@ -1,0 +1,84 @@
+.toc { position: relative; }
+.toc-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  color: #465973;
+  font-size: .8125rem;
+}
+.toc-toggle { display: none; }
+.toc-panel { max-height: calc(100dvh - 64px); overflow: auto; scrollbar-width: thin; }
+.toc-track { position: relative; }
+.toc-list, .toc-effects { display: grid; margin: 0; padding: 0; list-style: none; }
+.toc a {
+  display: block;
+  position: relative;
+  padding: 6px 8px 6px calc(14px + 12px * var(--toc-depth));
+  color: #465973;
+  font-size: .875rem;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+.toc a:hover { color: #16243b; }
+.toc a[data-active] { color: var(--toc-accent, #2359be); }
+.toc a:focus-visible { outline-offset: -2px; }
+.toc-list > li:first-child > a { padding-top: 0; }
+.toc a[data-last] { padding-bottom: 0; }
+.toc-rail, .toc-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.toc-rail { color: var(--toc-track-color, #ccd7e7); }
+.toc-indicator {
+  margin-top: var(--thumb-top, 0px);
+  height: var(--thumb-height, 0px);
+  background: var(--toc-accent, #2359be);
+  transition: margin-top var(--toc-duration, 150ms) cubic-bezier(.4, 0, .2, 1), height var(--toc-duration, 150ms) cubic-bezier(.4, 0, .2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toc-indicator, .toc a { transition: none; }
+}
+
+@media (width < 1280px) {
+  .toc {
+    padding: 0;
+    border-bottom: 1px solid #d8e1ee;
+    background: #f3f6fbf2;
+    backdrop-filter: blur(10px);
+  }
+  .toc-heading, .toc:not([data-open]) .toc-panel { display: none; }
+  .toc-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 36px;
+    padding: 4px 8px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: .8125rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .toc-chevron { flex: none; color: #465973; }
+  .toc-current { overflow: hidden; color: #465973; text-overflow: ellipsis; }
+  .toc[data-open] .toc-chevron { transform: rotate(90deg); }
+  .toc[data-open] .toc-current { visibility: hidden; }
+  .toc-panel {
+    position: absolute;
+    inset: 100% 0 auto;
+    max-height: 50vh;
+    padding: 8px 12px;
+    border-bottom: 1px solid #d8e1ee;
+    background: #f3f6fb;
+    box-shadow: 0 8px 16px #16243b16;
+  }
+}

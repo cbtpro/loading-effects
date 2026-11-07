@@ -12,31 +12,7 @@
         <h1>动效实验室</h1>
         <p class="intro">浏览预设、实时调参，并复制当前动效的接入代码。</p>
       </header>
-      <nav class="group-nav" aria-label="动效分类">
-        <p class="nav-heading" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-            stroke-width="1.25" stroke-linecap="round" focusable="false">
-            <path d="M2.5 4.5h10m-10 3.5h7m-7 3.5h9"/>
-          </svg>
-          动效分类
-        </p>
-        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="effect-nav-panel">
-          本页目录
-          <svg class="nav-chevron" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-            <path d="m6 4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-          <span class="nav-current"></span>
-        </button>
-        <div class="nav-panel" id="effect-nav-panel">
-          <div class="nav-track">
-            <svg class="nav-rail" width="12" aria-hidden="true" focusable="false">
-              <path fill="none" stroke="currentColor"/>
-            </svg>
-            <div class="nav-highlight" aria-hidden="true"><div class="nav-indicator"></div></div>
-            <ol class="nav-list"></ol>
-          </div>
-        </div>
-      </nav>
+      <div class="group-nav"></div>
       <main id="effects" aria-label="动效预览"></main>
     </div>
     <template id="effect-card">

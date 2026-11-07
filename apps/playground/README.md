@@ -9,3 +9,36 @@
 展开卡片的「查看代码」，选择 Vue、React 或 Web Components，以及 JS 或 TS，再点击「复制代码」。示例使用当前卡片的动效参数和静态预览设置。演示进度及内容就绪由 Playground 模拟，接入时由宿主任务提供。示例导入本仓库的工作区包。
 
 运行 `pnpm --filter @loading-effects/app-playground build` 生成生产构建。
+
+## 复用目录组件
+
+从 `src/toc.js` 导入 `mountToc`，传入挂载容器和 props。目录项的 `id` 指向页面中已挂载的元素，可用 `children` 嵌套目录。传入 `heading` 可单独指定用于滚动高亮的标题元素，省略时观察锚点元素。
+
+```js
+const toc = mountToc(host, {
+  items: [
+    {
+      id: 'particle-effects',
+      title: '粒子系统',
+      heading: document.querySelector('#particle-effects h2'),
+      children: [{
+        id: 'particle-network',
+        title: '粒子网络',
+        heading: document.querySelector('#particle-network h3'),
+      }],
+    },
+  ],
+  label: '动效分类',
+  compactLabel: '本页目录',
+  accentColor: '#2359be',
+  trackColor: '#ccd7e7',
+  duration: 150,
+  rootMargin: '-20px 0px -40% 0px',
+});
+
+toc.update({ accentColor: '#7c3aed', duration: 200 });
+// 页面卸载时
+toc.destroy();
+```
+
+`duration` 的单位为毫秒，`rootMargin` 遵循 `IntersectionObserver` 的格式。调用 `update(nextProps)` 只覆盖传入的字段，传入新 `items` 会更新目录和滚动监听。系统开启减少动态时，指示条直接更新位置。

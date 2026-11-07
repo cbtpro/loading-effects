@@ -12,7 +12,7 @@ import { createCssRenderer } from '@loading-effects/renderer-css';
 import { createCanvasRenderer } from '@loading-effects/renderer-canvas';
 import { createWebGLRenderer } from '@loading-effects/renderer-webgl';
 import { buildExample } from './code-example.js';
-import { mountGroupNav } from './group-nav.js';
+import { mountToc } from './toc.js';
 import './style.css';
 
 const groups = [
@@ -376,7 +376,7 @@ function mountCard(card, effect) {
 
 const cleanups = [];
 const list = document.querySelector('#effects');
-const sections = [];
+const tocItems = [];
 for (const [id, title, presets] of groups) {
   const section = document.createElement('section');
   const heading = document.createElement('h2');
@@ -389,11 +389,12 @@ for (const [id, title, presets] of groups) {
     const card = template.content.firstElementChild.cloneNode(true);
     section.append(card);
     cleanups.push(mountCard(card, effect));
-    return { card, title: effect.title };
+    return { id: card.id, title: effect.title, heading: card.querySelector('h3') };
   });
-  sections.push({ section, title, cards });
+  tocItems.push({ id, title, heading, children: cards });
 }
-cleanups.push(mountGroupNav(document.querySelector('.group-nav'), sections));
+const toc = mountToc(document.querySelector('.group-nav'), { items: tocItems, label: '动效分类' });
+cleanups.push(toc.destroy);
 
 window.addEventListener('pagehide', event => {
   if (!event.persisted) cleanups.forEach(cleanup => cleanup());

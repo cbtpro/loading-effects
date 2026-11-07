@@ -5,9 +5,9 @@ test('right sidebar follows heading depth and highlights a range on the shared S
   await page.goto('/');
   const nav = page.getByRole('navigation', { name: '动效分类' });
   const current = nav.locator('[aria-current="location"]');
-  const rail = nav.locator('svg.nav-rail');
-  const highlight = nav.locator('.nav-highlight');
-  const indicator = highlight.locator('.nav-indicator');
+  const rail = nav.locator('svg.toc-rail');
+  const highlight = nav.locator('.toc-highlight');
+  const indicator = highlight.locator('.toc-indicator');
   await expect(nav.getByRole('link')).toHaveCount(45);
   await expect(rail.locator('path')).toHaveAttribute('d', /^M1 .*L11 .*L1 /);
   await expect(highlight).toHaveCSS('mask-image', /data:image\/svg\+xml/);
@@ -58,6 +58,46 @@ test('narrow view opens a directory and closes it after navigating', async ({ pa
   const menu = await nav.boundingBox();
   expect(heading.y).toBeGreaterThan(menu.y + menu.height);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+});
+
+test('TOC props can update an independent component and destroy it', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 850 });
+  await page.goto('/');
+  await page.evaluate(async () => {
+    const { mountToc } = await import('/src/toc.js');
+    const host = document.createElement('div');
+    document.body.append(host);
+    window.demoToc = mountToc(host, {
+      label: '自定义目录',
+      items: [{ id: 'matrix-effects', title: '初始分类' }],
+    });
+  });
+  const custom = page.getByRole('navigation', { name: '自定义目录' });
+  await expect(custom.getByRole('link', { name: '初始分类' })).toBeAttached();
+  await page.evaluate(() => {
+    window.demoToc.update({
+      label: '更新后的目录',
+      accentColor: '#7c3aed',
+      trackColor: '#a3b2c3',
+      duration: 300,
+      rootMargin: '0px',
+      items: [{
+        id: 'particle-effects',
+        title: '粒子',
+        children: [{ id: 'particle-network', title: '网络' }],
+      }],
+    });
+  });
+  const updated = page.getByRole('navigation', { name: '更新后的目录' });
+  await expect(updated.getByRole('link')).toHaveCount(2);
+  await expect(updated.getByRole('link', { name: '网络' })).toHaveAttribute('href', '#particle-network');
+  await expect(updated.locator('.toc-rail path')).toHaveAttribute('d', /L11 /);
+  await expect(updated.locator('.toc-rail')).toHaveCSS('color', 'rgb(163, 178, 195)');
+  await expect(updated.locator('.toc-indicator')).toHaveCSS('background-color', 'rgb(124, 58, 237)');
+  await expect(updated.locator('.toc-indicator')).toHaveCSS('transition-duration', '0.3s, 0.3s');
+  await page.evaluate(() => window.demoToc.destroy());
+  await expect(updated).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: '动效分类' }).getByRole('link')).toHaveCount(45);
 });
 
 test('card configuration, completion and rendering stay independent', async ({ page }) => {
