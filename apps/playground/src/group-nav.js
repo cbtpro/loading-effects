@@ -1,7 +1,7 @@
 export function mountGroupNav(nav, sections) {
   const list = nav.querySelector('.nav-list');
   const range = nav.querySelector('.nav-range');
-  const links = sections.map(({ section, title, count }) => {
+  const links = sections.map(({ section, title }) => {
     const item = document.createElement('li');
     const link = document.createElement('a');
     link.href = `#${section.id}`;
@@ -9,12 +9,8 @@ export function mountGroupNav(nav, sections) {
       <svg class="nav-marker" width="8" height="24" viewBox="0 0 8 24" aria-hidden="true" focusable="false">
         <path d="M7 1.5H2V22.5H7" fill="none" stroke="currentColor" stroke-width="1.5"
           stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 3"/>
-      </svg>
-      <span></span><span class="nav-count"></span>`;
-    link.querySelector('span').textContent = title;
-    const badge = link.querySelector('.nav-count');
-    badge.textContent = count;
-    badge.setAttribute('aria-hidden', 'true');
+      </svg>`;
+    link.append(title);
     item.append(link);
     list.append(item);
     return link;

@@ -385,7 +385,7 @@ for (const [id, title, presets] of groups) {
   heading.textContent = title;
   section.append(heading);
   list.append(section);
-  sections.push({ section, title, count: presets.length });
+  sections.push({ section, title });
 
   for (const effect of presets) {
     const card = template.content.firstElementChild.cloneNode(true);
