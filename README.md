@@ -1,5 +1,8 @@
 # Loading Effects
 
+[![Regression Checks](https://github.com/cbtpro/loading-effects/actions/workflows/v01-checks.yml/badge.svg?branch=main)](https://github.com/cbtpro/loading-effects/actions/workflows/v01-checks.yml)
+[![Documentation Pages](https://github.com/cbtpro/loading-effects/actions/workflows/docs-pages.yml/badge.svg?branch=main)](https://github.com/cbtpro/loading-effects/actions/workflows/docs-pages.yml)
+
 面向 Web 应用的可配置、跨框架 Loading 动效库。规划覆盖按钮和表单等待、全画布生成、真实任务进度与内容占位。
 
 ## 开始
@@ -38,7 +41,7 @@ pnpm --filter @loading-effects/example-frameworks dev --port 4174
 
 ## 文档
 
-Docusaurus 直接使用根目录的文档与图片，支持本地预览和 GitHub Pages 发布。参见[文档站运行与部署说明](apps/docs/README.md)。
+在线文档见 [Loading Effects 文档站](https://cbtpro.github.io/loading-effects/)。Docusaurus 直接读取根目录的文档与图片，本地运行方式见[文档站运行与部署说明](apps/docs/README.md)。
 
 - [接入指南与生命周期](docs/integration.md)
 - [产品需求与里程碑](docs/product-requirements.md)

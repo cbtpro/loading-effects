@@ -1,6 +1,8 @@
 const pagesPath = (process.env.BASE_URL ?? '').replace(/^\/+|\/+$/g, '');
 const baseUrl = pagesPath ? `/${pagesPath}/` : '/';
-const repository = process.env.GITHUB_REPOSITORY;
+const repository = process.env.GITHUB_REPOSITORY || 'cbtpro/loading-effects';
+const repositoryUrl = 'https://github.com/' + repository;
+const sourceBranch = process.env.DOCS_SOURCE_BRANCH || 'main';
 
 module.exports = {
   title: 'Loading Effects',
@@ -24,6 +26,7 @@ module.exports = {
         path: '../../docs',
         routeBasePath: '/',
         sidebarPath: './sidebars.js',
+        editUrl: ({ docPath }) => `${repositoryUrl}/edit/${sourceBranch}/docs/${docPath}`,
       },
       blog: false,
     }],
@@ -35,7 +38,7 @@ module.exports = {
         { type: 'doc', docId: 'index', label: '开始', position: 'left' },
         { type: 'doc', docId: 'effect-catalog', label: '动效目录', position: 'left' },
         { type: 'doc', docId: 'architecture', label: '技术设计', position: 'left' },
-        ...(repository ? [{ href: `https://github.com/${repository}`, label: 'GitHub', position: 'right' }] : []),
+        { href: repositoryUrl, label: 'GitHub', position: 'right' },
       ],
     },
   },

@@ -1,4 +1,4 @@
-name: v0.1 Regression Checks
+name: Regression Checks
 
 on:
   pull_request:

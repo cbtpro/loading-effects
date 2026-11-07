@@ -33,6 +33,7 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Build documentation
         env:
+          DOCS_SOURCE_BRANCH: ${{ github.event.repository.default_branch }}
           SITE_URL: ${{ steps.pages.outputs.origin || 'https://example.github.io' }}
           BASE_URL: ${{ github.event_name == 'pull_request' && format('/{0}/', github.event.repository.name) || steps.pages.outputs.base_path }}
         run: pnpm --filter @loading-effects/app-docs build
