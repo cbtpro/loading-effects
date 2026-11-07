@@ -3,8 +3,10 @@ import { expect, test } from '@playwright/test';
 test('right sidebar marks the current group with a dashed SVG and follows scrolling', async ({ page }) => {
   await page.goto('/');
   const nav = page.getByRole('navigation', { name: '动效分类' });
-  const current = nav.locator('[aria-current="location"]');
-  await expect(nav.getByRole('link')).toHaveCount(7);
+  const current = nav.locator('.nav-group-link[data-active]');
+  const currentEffect = nav.locator('[aria-current="location"]');
+  await expect(nav.locator('.nav-group-link')).toHaveCount(7);
+  await expect(currentEffect).toHaveText('点阵波浪');
   await expect(current).toHaveText(/点阵与波纹/);
   const marker = nav.locator('.nav-range');
   await expect(marker).toBeVisible();
@@ -24,22 +26,32 @@ test('right sidebar marks the current group with a dashed SVG and follows scroll
   const previous = await nav.getByRole('link', { name: '进度反馈' }).boundingBox();
   const next = await nav.getByRole('link', { name: '骨架占位' }).boundingBox();
   await expect.poll(async () => Math.round((await marker.boundingBox()).y)).toBe(Math.round(previous.y + 3));
-  const range = await marker.boundingBox();
-  expect(range.y + range.height).toBeCloseTo(next.y + next.height - 3);
+  await expect.poll(async () => {
+    const range = await marker.boundingBox();
+    return Math.round(range.y + range.height);
+  }).toBe(Math.round(next.y + next.height - 3));
   const dashOffset = () => marker.locator('path').evaluate(path => getComputedStyle(path).strokeDashoffset);
   const phase = await dashOffset();
   await page.evaluate(() => window.scrollBy(0, 11));
   await expect.poll(dashOffset).not.toBe(phase);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect.poll(dashOffset).toBe('0px');
+  const particleLinks = nav.getByRole('list', { name: '粒子系统' });
+  await particleLinks.getByRole('link', { name: '粒子网络' }).click();
+  await expect(page).toHaveURL(/#particle-network$/);
+  await expect(currentEffect).toHaveText('粒子网络');
+  await page.locator('#particle-flow').evaluate(card => card.scrollIntoView());
+  await expect(currentEffect).toHaveText('粒子流');
 });
 
 test('narrow view keeps category links accessible without covering anchor targets', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/#particle-network');
   const nav = page.getByRole('navigation', { name: '动效分类' });
-  const current = nav.locator('[aria-current="location"]');
+  const current = nav.locator('.nav-group-link[data-active]');
+  const currentEffect = nav.locator('[aria-current="location"]');
   await expect(current).toHaveText(/粒子系统/);
+  await expect(currentEffect).toHaveText('粒子网络');
   await nav.getByRole('link', { name: '基础几何' }).click();
   await expect(current).toHaveText(/基础几何/);
   const heading = await page.getByRole('heading', { name: '基础几何' }).boundingBox();

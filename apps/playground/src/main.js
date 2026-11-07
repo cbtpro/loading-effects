@@ -385,13 +385,13 @@ for (const [id, title, presets] of groups) {
   heading.textContent = title;
   section.append(heading);
   list.append(section);
-  sections.push({ section, title });
-
-  for (const effect of presets) {
+  const cards = presets.map(effect => {
     const card = template.content.firstElementChild.cloneNode(true);
     section.append(card);
     cleanups.push(mountCard(card, effect));
-  }
+    return { card, title: effect.title };
+  });
+  sections.push({ section, title, cards });
 }
 cleanups.push(mountGroupNav(document.querySelector('.group-nav'), sections));
 
