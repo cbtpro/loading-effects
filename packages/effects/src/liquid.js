@@ -117,6 +117,38 @@ function drawLiquidFill(ctx, tank, elapsed, options, state, _size, still) {
   ctx.restore();
 }
 
+function mountLiquidFallback(host) {
+  const document = host.ownerDocument;
+  const tank = document.createElement('div');
+  const fill = document.createElement('div');
+  const label = document.createElement('span');
+  Object.assign(host.style, { display: 'grid', placeItems: 'center', containerType: 'size' });
+  Object.assign(tank.style, {
+    width: 'min(80%, 100px)', aspectRatio: '1', position: 'relative',
+    overflow: 'hidden', display: 'grid', placeItems: 'center',
+  });
+  tank.style.width = 'min(80cqw, 76cqh, 132px)';
+  Object.assign(fill.style, { position: 'absolute', bottom: '0', insetInline: '0' });
+  Object.assign(label.style, {
+    position: 'relative', borderRadius: '999px', padding: '2px 7px',
+    backgroundColor: '#fff', color: '#16243b', font: '600 12px system-ui',
+  });
+  tank.append(fill, label);
+  host.append(tank);
+  return ({ progress, progressSource, shape, color, showValue }) => {
+    tank.style.borderRadius = shape === 'circle' ? '50%' : '18%';
+    tank.style.color = color;
+    tank.style.backgroundColor = '#eaf2ff';
+    tank.style.backgroundColor = 'color-mix(in srgb, currentColor 11%, transparent)';
+    tank.style.boxShadow = 'inset 0 0 0 1px color-mix(in srgb, currentColor 35%, transparent)';
+    fill.style.backgroundColor = color;
+    fill.style.height = `${progress ?? 0}%`;
+    label.hidden = !showValue;
+    label.textContent = progress === null ? '加载中' :
+      `${progressSource === 'estimated' ? '预计 ' : ''}${progress}%`;
+  };
+}
+
 export const liquidFill = {
   id: 'liquid-fill',
   title: '液位填充',
@@ -126,6 +158,7 @@ export const liquidFill = {
   layoutFields: ['shape'],
   createState: createWaveState,
   draw: drawLiquidFill,
+  mountFallback: mountLiquidFallback,
   schema: {
     ...waveSchema,
     backColor: { type: 'color', default: '#74A7FA', label: '后层液面颜色' },

@@ -42,6 +42,8 @@ function mountCard(card, effect) {
   const forceStatic = get('static');
   const trigger = get('trigger');
   const preview = surface.parentElement;
+  const liquidDemo = effect === liquidFill;
+  if (liquidDemo) card.querySelector('.settings').open = true;
   if (effect === circularProgress) progress.classList.add('sr-only');
   mode.closest('fieldset').hidden = Boolean(effect.stageProgress || effect.skeleton);
   if (effect.skeleton) progress.classList.add('sr-only');
@@ -293,8 +295,8 @@ function mountCard(card, effect) {
     progress.classList.remove('leaving');
     get('ready').hidden = true;
     get('result').setAttribute('aria-busy', 'true');
-    mode.value = 'unknown';
-    value.value = '0';
+    mode.value = liquidDemo ? 'actual' : 'unknown';
+    value.value = liquidDemo ? '63' : '0';
     forceStatic.checked = false;
     mode.disabled = false;
     pause.disabled = false;
@@ -303,7 +305,9 @@ function mountCard(card, effect) {
     finish.disabled = false;
     loading = createLoading(surface, { effect: effect.id }, registry);
     showRenderer(loading.renderer);
-    if (effect === waveProgress || effect === liquidFill) progress.classList.toggle('sr-only', loading.renderer === 'canvas');
+    if (effect === waveProgress || liquidDemo) {
+      progress.classList.toggle('sr-only', liquidDemo || loading.renderer === 'canvas');
+    }
     if (effect.reveal) {
       setOption('content', {
         title: '加载动效示例',

@@ -15,14 +15,20 @@ export function createCanvasRenderer(element, effect) {
     fallback.setAttribute('aria-hidden', 'true');
     Object.assign(fallback.style, { width: '100%', height: '100%', pointerEvents: 'none' });
     element.append(fallback);
+    const updateFallback = effect.mountFallback?.(fallback);
     return {
       name: 'static',
       animated: false,
-      update({ background, color, opacity }) {
+      update(options) {
+        const { background, color, opacity } = options;
         fallback.style.background = background;
+        fallback.style.opacity = opacity;
+        if (updateFallback) {
+          updateFallback(options);
+          return;
+        }
         fallback.style.backgroundImage = `radial-gradient(circle, ${color} 1px, transparent 1.5px)`;
         fallback.style.backgroundSize = '18px 18px';
-        fallback.style.opacity = opacity;
       },
       resize() {},
       render() {},

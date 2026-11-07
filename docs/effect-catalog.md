@@ -73,11 +73,11 @@ import EffectDemo, { EffectGallery } from '@site/src/components/EffectDemo';
 
 #### 液位填充
 
-拖动滑块可调整圆形容器内的液位。百分比表示从容器底部向上量的液面高度，圆形截面中可见的填充面积会随液位非线性变化。液面前后两层向相反方向移动，可在 Playground 中分别调整颜色，或切换到圆角方形。
+文档演示与 Playground 均默认显示 `63%` 液位，拖动滑块可以立即调整。百分比表示从容器底部向上量的液面高度，圆形截面中可见的填充面积会随液位非线性变化。液面前后两层向相反方向移动，可在 Playground 中分别调整颜色，或切换到圆角方形。
 
 - `0%` 保留空容器，`100%` 完整填充。内容就绪仍由宿主通知。
 - `progress: null` 显示等待圆点。勾选「未知进度」可观察该状态。
-- 减少动态时，已知进度显示平直液面，未知进度保留静态圆点。
+- 减少动态时，已知进度显示平直液面，未知进度保留静态圆点。Canvas 2D 不可用时仍显示静态液位。
 
 <EffectDemo id="liquid-fill" options={{ progress: 63, amplitude: 5 }} progressControl />
 

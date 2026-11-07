@@ -327,9 +327,11 @@ test('liquid fill clips to its selected shape and preserves real progress', asyn
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const card = page.locator('#liquid-fill');
-  await card.getByText('参数与演示进度', { exact: true }).click();
+  await expect(card.locator('.settings')).toHaveAttribute('open', '');
+  await expect(card.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '63');
   await card.getByLabel('显示数值', { exact: true }).uncheck();
   await card.getByLabel('进度模式').selectOption('actual');
+  await card.getByLabel('进度值', { exact: false }).fill('0');
   const canvas = card.locator('canvas');
   const alpha = (corner = false) => canvas.evaluate((node, corner) => {
     const size = Math.min(node.clientWidth * .8, node.clientHeight * .76, 132);
@@ -440,7 +442,8 @@ test('liquid fill layers waves only while the task progress is known and motion 
   });
   await page.goto('/');
   const card = page.locator('#liquid-fill');
-  await card.getByText('参数与演示进度', { exact: true }).click();
+  await expect(card.locator('.settings')).toHaveAttribute('open', '');
+  await expect(card.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '63');
   await card.getByLabel('显示数值', { exact: true }).uncheck();
   await card.getByLabel('进度模式').selectOption('estimated');
   await card.getByLabel('进度值', { exact: false }).fill('63');
@@ -455,4 +458,24 @@ test('liquid fill layers waves only while the task progress is known and motion 
   await card.locator('.preview').scrollIntoViewIfNeeded();
   await expect(card.getByRole('progressbar')).toHaveCount(0);
   await expect.poll(paints).toEqual(['#2359be', '#2359be', '#2359be']);
+});
+
+test('liquid fill opens with visible progress even without Canvas 2D', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      return type === '2d' ? null : original.call(this, type, ...args);
+    };
+  });
+  await page.goto('/#liquid-fill');
+  const card = page.locator('#liquid-fill');
+  await expect(card.locator('[data-part="renderer"]')).toHaveText('静态备用图形');
+  await expect(card.getByLabel('进度值', { exact: false })).toHaveValue('63');
+  const fill = card.locator('.surface > div > div > div');
+  await expect.poll(() => fill.evaluate(node => node.style.height)).toBe('63%');
+  await card.getByLabel('进度值', { exact: false }).fill('80');
+  await expect.poll(() => fill.evaluate(node => node.style.height)).toBe('80%');
+  await expect(card.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '80');
+  await card.getByRole('button', { name: '恢复默认' }).click();
+  await expect.poll(() => fill.evaluate(node => node.style.height)).toBe('63%');
 });
