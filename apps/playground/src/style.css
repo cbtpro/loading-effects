@@ -41,6 +41,7 @@ h3 { margin: 0; font-size: 1.0625rem; }
   font-size: .75rem;
   font-weight: 650;
 }
+.nav-track { position: relative; }
 .nav-list { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
 .nav-list a {
   display: flex;
@@ -59,7 +60,17 @@ h3 { margin: 0; font-size: 1.0625rem; }
 .nav-list a:focus-visible { outline-offset: -2px; }
 .nav-list a[aria-current] { background: #eaf2ff; color: #163e87; font-weight: 650; }
 .nav-marker { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); visibility: hidden; color: #2359be; }
-.nav-list a[aria-current] .nav-marker { visibility: visible; }
+.nav-range {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  height: 0;
+  transform: translateY(var(--range-top, 0px));
+  transition: transform 220ms ease-out;
+  pointer-events: none;
+  color: #2359be;
+}
+.nav-range path, .nav-marker path { stroke-dashoffset: var(--dash-offset, 0); }
 .nav-count { margin-inline-start: auto; font-size: .75rem; font-variant-numeric: tabular-nums; color: #465973; }
 
 #effects { grid-area: effects; min-width: 0; }
@@ -160,7 +171,10 @@ fieldset { display: grid; gap: 8px; min-width: 0; border: 1px solid #d8e1ee; bor
 output { font-variant-numeric: tabular-nums; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 @media (max-width: 600px) { .settings-grid { grid-template-columns: minmax(0, 1fr); gap: 0; } }
-@media (prefers-reduced-motion: reduce) { .leaving { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .leaving, .nav-range { transition: none; }
+  .nav-range path, .nav-marker path { stroke-dashoffset: 0; }
+}
 
 .code-toolbar, .code-choices {
   display: flex;
@@ -212,7 +226,8 @@ output { font-variant-numeric: tabular-nums; }
     padding-top: 16px;
   }
   .group-nav { top: 0; padding: 4px; }
-  .nav-heading, .nav-count { display: none; }
+  .nav-heading, .nav-count, .nav-range { display: none; }
+  .nav-list a[aria-current] .nav-marker { visibility: visible; }
   .nav-list { display: flex; overflow-x: auto; scrollbar-width: thin; }
   .nav-list li { flex: none; }
   .effect-group, .effect-card { scroll-margin-top: 64px; }

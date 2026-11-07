@@ -1,5 +1,6 @@
 export function mountGroupNav(nav, sections) {
   const list = nav.querySelector('.nav-list');
+  const range = nav.querySelector('.nav-range');
   const links = sections.map(({ section, title, count }) => {
     const item = document.createElement('li');
     const link = document.createElement('a');
@@ -31,6 +32,7 @@ export function mountGroupNav(nav, sections) {
     }
     const link = links[active];
     const width = list.clientWidth;
+    nav.style.setProperty('--dash-offset', String(-(window.scrollY * .22 % 5)));
     if (current === link && listWidth === width) return;
     listWidth = width;
     if (current !== link) {
@@ -38,6 +40,11 @@ export function mountGroupNav(nav, sections) {
       link.setAttribute('aria-current', 'location');
       current = link;
     }
+    const start = Math.max(0, Math.min(active - 1, links.length - 3));
+    const first = links[start];
+    const last = links[Math.min(start + 2, links.length - 1)];
+    range.style.setProperty('--range-top', `${first.offsetTop + 3}px`);
+    range.style.height = `${last.offsetTop + last.offsetHeight - first.offsetTop - 6}px`;
     if (list.scrollWidth > width) {
       const viewport = list.getBoundingClientRect();
       const item = link.getBoundingClientRect();

@@ -6,10 +6,9 @@ test('right sidebar marks the current group with a dashed SVG and follows scroll
   const current = nav.locator('[aria-current="location"]');
   await expect(nav.getByRole('link')).toHaveCount(7);
   await expect(current).toHaveText(/点阵与波纹/);
-  const marker = current.locator('svg');
+  const marker = nav.locator('.nav-range');
   await expect(marker).toBeVisible();
   await expect(marker.locator('path')).toHaveAttribute('stroke-dasharray', /\S/);
-  await expect(nav.getByRole('link', { name: '基础几何' }).locator('svg')).toBeHidden();
   const sidebar = await nav.boundingBox();
   const preview = await page.locator('#dot-matrix-wave').boundingBox();
   expect(sidebar.x).toBeGreaterThan(preview.x + preview.width);
@@ -22,6 +21,17 @@ test('right sidebar marks the current group with a dashed SVG and follows scroll
   await page.locator('#particle-effects').evaluate(section => section.scrollIntoView());
   await expect(current).toHaveText(/粒子系统/);
   await expect(nav.locator('[aria-current]')).toHaveCount(1);
+  const previous = await nav.getByRole('link', { name: '进度反馈' }).boundingBox();
+  const next = await nav.getByRole('link', { name: '骨架占位' }).boundingBox();
+  await expect.poll(async () => Math.round((await marker.boundingBox()).y)).toBe(Math.round(previous.y + 3));
+  const range = await marker.boundingBox();
+  expect(range.y + range.height).toBeCloseTo(next.y + next.height - 3);
+  const dashOffset = () => marker.locator('path').evaluate(path => getComputedStyle(path).strokeDashoffset);
+  const phase = await dashOffset();
+  await page.evaluate(() => window.scrollBy(0, 11));
+  await expect.poll(dashOffset).not.toBe(phase);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(dashOffset).toBe('0px');
 });
 
 test('narrow view keeps category links accessible without covering anchor targets', async ({ page }) => {
