@@ -6,10 +6,14 @@ test('right sidebar follows heading depth and highlights a range on the shared S
   const nav = page.getByRole('navigation', { name: '动效分类' });
   const current = nav.locator('[aria-current="location"]');
   const rail = nav.locator('svg.nav-rail');
-  const indicator = rail.locator('.nav-indicator');
+  const highlight = nav.locator('.nav-highlight');
+  const indicator = highlight.locator('.nav-indicator');
   await expect(nav.getByRole('link')).toHaveCount(45);
   await expect(rail.locator('path')).toHaveAttribute('d', /^M1 .*L11 .*L1 /);
-  await expect(indicator).toHaveAttribute('href', '#effect-nav-path');
+  await expect(highlight).toHaveCSS('mask-image', /data:image\/svg\+xml/);
+  await expect(indicator).toHaveCSS('transition-property', 'margin-top, height');
+  await expect(indicator).toHaveCSS('transition-duration', '0.15s, 0.15s');
+  await expect(indicator).toHaveCSS('transition-timing-function', 'cubic-bezier(0.4, 0, 0.2, 1), cubic-bezier(0.4, 0, 0.2, 1)');
   const sidebar = await nav.boundingBox();
   const preview = await page.locator('#dot-matrix-wave').boundingBox();
   expect(sidebar.x).toBeGreaterThan(preview.x + preview.width);
@@ -17,17 +21,19 @@ test('right sidebar follows heading depth and highlights a range on the shared S
   await nav.getByRole('link', { name: '粒子网络', exact: true }).click();
   await expect(page).toHaveURL(/#particle-network$/);
   await expect(current).toHaveText('粒子网络');
+  await indicator.evaluate(node => {
+    node.addEventListener('transitionrun', event => {
+      if (event.propertyName === 'margin-top') node.dataset.moved = '';
+    });
+  });
 
   await page.locator('#geometry-effects').evaluate(section => {
     window.scrollBy(0, section.getBoundingClientRect().top - 40);
   });
   await expect(nav.getByRole('link', { name: '基础几何', exact: true })).toHaveAttribute('data-active', '');
   await expect.poll(() => nav.locator('[data-active]').count()).toBeGreaterThan(1);
-  await expect.poll(() => rail.evaluate(node => {
-    const top = parseFloat(node.style.getPropertyValue('--thumb-top'));
-    const bottom = parseFloat(node.style.getPropertyValue('--thumb-bottom'));
-    return Number(node.getAttribute('height')) - top - bottom;
-  })).toBeGreaterThan(32);
+  await expect(indicator).toHaveAttribute('data-moved', '');
+  await expect.poll(() => indicator.evaluate(node => parseFloat(getComputedStyle(node).height))).toBeGreaterThan(32);
 
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const lastEffect = page.locator('.effect-card h3').last();

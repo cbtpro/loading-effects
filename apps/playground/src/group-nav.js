@@ -14,8 +14,10 @@ export function mountGroupNav(nav, sections) {
   const track = nav.querySelector('.nav-track');
   const rail = nav.querySelector('.nav-rail');
   const path = rail.querySelector('path');
+  const highlight = nav.querySelector('.nav-highlight');
   const toggle = nav.querySelector('.nav-toggle');
   const summary = nav.querySelector('.nav-current');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const entries = sections.flatMap(({ section, title, cards }) => {
     const group = addEntry(list, section, title, section.querySelector('h2'), 0);
     const children = document.createElement('ol');
@@ -32,23 +34,27 @@ export function mountGroupNav(nav, sections) {
   let current;
   let frame;
   let needsMeasure = true;
-  let railHeight = 0;
 
   // Measure the complete rail once per layout change. Both the muted rail
   // and its animated highlight render the same path.
   function measureRail() {
-    railHeight = track.clientHeight;
+    const railHeight = track.clientHeight;
     if (!railHeight) return;
     const commands = entries.map((entry, index) => {
       const x = entry.depth ? 11 : 1;
       const top = entry.link.offsetTop;
       const bottom = top + entry.link.offsetHeight;
-      entry.railTop = top + (entries[index - 1]?.depth !== entry.depth && index > 0 ? 6 : 0);
-      entry.railBottom = bottom - (entries[index + 1] && entries[index + 1].depth !== entry.depth ? 6 : 0);
+      const style = getComputedStyle(entry.link);
+      entry.railTop = top + parseFloat(style.paddingTop);
+      entry.railBottom = bottom - parseFloat(style.paddingBottom);
       return `${index ? 'L' : 'M'}${x} ${entry.railTop}L${x} ${entry.railBottom}`;
     });
     rail.setAttribute('height', railHeight);
-    path.setAttribute('d', commands.join(' '));
+    const geometry = commands.join(' ');
+    path.setAttribute('d', geometry);
+    const mask = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 ${railHeight}"><path d="${geometry}" fill="none" stroke="black"/></svg>`;
+    highlight.style.height = `${railHeight}px`;
+    highlight.style.maskImage = `url("data:image/svg+xml,${encodeURIComponent(mask)}")`;
   }
 
   function alignedAnchor() {
@@ -63,10 +69,10 @@ export function mountGroupNav(nav, sections) {
   function readActive(anchor, atBottom) {
     if (atBottom) {
       const first = entries.findIndex(entry => visible.has(entry.heading));
-      return entries.slice(first < 0 ? -1 : first);
+      return entries.slice(first < 0 ? entries.indexOf(active[0] ?? entries.at(-1)) : first);
     }
-    const observed = entries.filter(entry => entry === anchor || visible.has(entry.heading));
-    return observed.length ? observed : active.length ? active : entries.slice(0, 1);
+    const observed = entries.filter(entry => visible.has(entry.heading));
+    return observed.length ? observed : anchor ? [anchor] : active;
   }
 
   function update() {
@@ -83,27 +89,31 @@ export function mountGroupNav(nav, sections) {
     for (const entry of active) {
       if (!next.includes(entry)) entry.link.removeAttribute('data-active');
     }
-    for (const entry of next) entry.link.setAttribute('data-active', '');
+    const entering = next.filter(entry => !active.includes(entry));
+    for (const entry of entering) entry.link.setAttribute('data-active', '');
     active = next;
     const last = active.at(-1);
     const primary = anchor ?? last;
     const changed = current !== primary;
     if (changed) {
       current?.link.removeAttribute('aria-current');
-      primary.link.setAttribute('aria-current', 'location');
-      summary.textContent = primary.link.textContent;
+      primary?.link.setAttribute('aria-current', 'location');
+      summary.textContent = primary?.link.textContent ?? '';
       current = primary;
     }
-    if ((changed || measured) && panel.clientHeight) {
+    const reveal = entering.at(-1) ?? ((changed || measured) ? primary : undefined);
+    if (reveal && panel.clientHeight) {
       const panelBounds = panel.getBoundingClientRect();
-      const link = primary.link.getBoundingClientRect();
-      if (link.top < panelBounds.top || link.bottom > panelBounds.bottom) {
-        panel.scrollTop += (link.top + link.bottom - panelBounds.top - panelBounds.bottom) / 2;
-      }
+      const link = reveal.link.getBoundingClientRect();
+      panel.scrollTo({
+        top: panel.scrollTop + (link.top + link.bottom - panelBounds.top - panelBounds.bottom) / 2,
+        behavior: measured || reducedMotion.matches ? 'instant' : 'smooth',
+      });
     }
-    if (railHeight) {
-      rail.style.setProperty('--thumb-top', `${active[0].railTop}px`);
-      rail.style.setProperty('--thumb-bottom', `${railHeight - last.railBottom}px`);
+    if (last?.railBottom !== undefined) {
+      const top = active[0].railTop;
+      highlight.style.setProperty('--thumb-top', `${top}px`);
+      highlight.style.setProperty('--thumb-height', `${last.railBottom - top}px`);
     }
   }
 

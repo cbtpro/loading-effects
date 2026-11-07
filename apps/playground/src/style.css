@@ -58,18 +58,22 @@ h3 { margin: 0; font-size: 1.0625rem; }
 .group-nav a:hover { color: #16243b; }
 .group-nav a[data-active] { color: #2359be; }
 .group-nav a:focus-visible { outline-offset: -2px; }
+.nav-list > li:first-child > a { padding-top: 0; }
+.nav-list > li:last-child .nav-effects > li:last-child > a { padding-bottom: 0; }
 .nav-effects a { padding-inline-start: 26px; }
-.nav-rail {
+.nav-rail, .nav-highlight {
   position: absolute;
   top: 0;
   left: 0;
-  color: #ccd7e7;
   pointer-events: none;
 }
+.nav-rail { color: #ccd7e7; }
+.nav-highlight { width: 12px; }
 .nav-indicator {
-  color: #2359be;
-  clip-path: inset(var(--thumb-top, 0px) 0 var(--thumb-bottom, 100%));
-  transition: clip-path 200ms ease-out;
+  margin-top: var(--thumb-top, 0px);
+  height: var(--thumb-height, 0px);
+  background: #2359be;
+  transition: margin-top 150ms cubic-bezier(.4, 0, .2, 1), height 150ms cubic-bezier(.4, 0, .2, 1);
 }
 
 #effects { grid-area: effects; min-width: 0; }
