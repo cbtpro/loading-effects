@@ -1,6 +1,7 @@
 module.exports = {
   docs: [
     'index',
+    'integration',
     'effect-catalog',
     {
       type: 'category',

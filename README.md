@@ -8,7 +8,6 @@
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm -r list --depth -1
 ```
 
 Playground 已接入 33 种预设。`v1.0.0-alpha.1` 在 v0.2 的基础上增加输入省略号、字符波浪、文字流光和字符解码。
@@ -41,8 +40,9 @@ pnpm --filter @loading-effects/example-frameworks dev --port 4174
 
 Docusaurus 直接使用根目录的文档与图片，支持本地预览和 GitHub Pages 发布。参见[文档站运行与部署说明](apps/docs/README.md)。
 
+- [接入指南与生命周期](docs/integration.md)
 - [产品需求与里程碑](docs/product-requirements.md)
-- [v0.1 发布检查与回归命令](docs/release-v01.md)
+- [回归与发布检查](docs/release-v01.md)
 - [10 类 50 项动效目录](docs/effect-catalog.md)
 - [8 种基础几何动效实拍](docs/effect-catalog.md#基础几何实拍)
 - [6 种点阵动效实拍](docs/dot-matrix-ripple.md#playground-实拍)

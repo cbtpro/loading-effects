@@ -1,10 +1,10 @@
-# v0.1 发布检查
+# 回归与发布检查
 
-v0.1 包含 14 种预设、CSS 与 Canvas 2D 渲染器，以及 Vanilla JS、React、Vue 接入。当前预发布版本和新增动效见[里程碑](product-requirements.md#里程碑)。
+本页记录当前工作区的检查方式。各版本的功能范围见[里程碑](product-requirements.md#里程碑)。`v1.0.0-alpha.1` 对应文字动效批次，包含 33 个预设。版本标签用于定位源码与文档，当前工作区包供本地接入使用。
 
 ## 回归命令
 
-在项目根目录执行。
+在项目根目录执行。首次运行浏览器回归时安装对应浏览器。
 
 ```sh
 pnpm install --frozen-lockfile
@@ -14,9 +14,9 @@ pnpm test:e2e
 pnpm -r --if-present build
 ```
 
-`test:bundle` 重新构建 React/Vue 示例，确认生产包只包含实际导入的两个预设。浏览器回归覆盖屏外停帧、相位和进度恢复、静态模式、Canvas 降级、示例代码复制以及框架组件卸载。GitHub Actions 的 `v0.1 Regression Checks` 运行相同检查。
+`test:bundle` 重新构建 框架示例，确认生产包只包含实际导入的两个预设。浏览器回归覆盖 Chromium、Firefox 和 WebKit，包括屏外停帧、相位和进度恢复、Canvas 降级、框架卸载和文字动效。系统剪贴板用例在 Chromium 执行。GitHub Actions 的 `v0.1 Regression Checks` 运行相同检查。
 
-## 发布前确认
+## GitHub Pages 与 npm 发布
 
 - 在移动真机上复核滚动、触摸涟漪和持续播放的表现，并用屏幕阅读器检查进度及状态播报。
 - 若要公开发布包，确认开源许可证和 npm 包名，核对发布文件及各包依赖后再调整私有标记。当前包供工作区内使用。

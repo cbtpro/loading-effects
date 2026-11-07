@@ -6,6 +6,7 @@ sidebar_label: 开始
 
 Loading Effects 是面向 Web 的可配置加载动效库。目前的 Playground 提供 33 种预设，分为基础几何、点阵与波纹、进度反馈、粒子系统、骨架占位和文字动效。每种动效可独立调参，并提供 Vue、React、Web Components 的 JS 和 TS 接入示例。
 
+- [接入指南](integration.md)包含 Vanilla JS、React、Vue 和 Web Components 的接入方式。
 - [动效目录](effect-catalog.md)包含 50 项规划及已实现动效的实拍。
 - [点阵与波纹](dot-matrix-ripple.md)包含 6 种预设的参数、波形和浏览器截图。
 - [技术设计](architecture.md)说明时间轴、渲染器和框架适配的职责。
@@ -21,3 +22,12 @@ pnpm --filter @loading-effects/app-playground dev --port 4173
 ```
 
 打开 [本地 Playground](http://127.0.0.1:4173/)，向下浏览动效卡片。展开「参数与演示进度」可以调参，展开「查看代码」可以切换框架和语言并复制示例。
+
+## 本地运行框架示例与文档站
+
+```sh
+pnpm --filter @loading-effects/example-frameworks dev --port 4174
+pnpm --filter @loading-effects/app-docs start
+```
+
+在两个终端分别执行，打开[框架示例](http://127.0.0.1:4174/)和[文档站](http://localhost:3000/)。框架示例可切换动效、更新参数并观察卸载和重新挂载。
