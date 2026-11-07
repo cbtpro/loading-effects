@@ -10,7 +10,7 @@
 pnpm install --frozen-lockfile
 ```
 
-Playground 已接入 35 种预设。`v1.0.0-alpha.2` 增加液态形变和液位填充。
+Playground 已接入 38 种预设。`v1.0.0-alpha.3` 增加融合液滴、流体丝带和墨水扩散，补齐流体与液态分组。
 
 ```sh
 pnpm --filter @loading-effects/app-playground dev --port 4173

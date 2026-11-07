@@ -67,9 +67,15 @@ import EffectDemo, { EffectGallery } from '@site/src/components/EffectDemo';
 
 ### Canvas 流体演示
 
-液态形变通过调整半径、波瓣数和振幅改变轮廓。液位填充沿用波浪进度的任务协议，`progress: null` 显示等待状态，`0–100` 控制液位。容器可在圆形和圆角方形之间切换。示例使用圆形和 63% 确定进度。其余三项 WebGL 流体效果仍在规划中。
+液态形变通过调整半径、波瓣数和振幅改变轮廓。液位填充沿用波浪进度的任务协议，`progress: null` 显示等待状态，`0–100` 控制液位。容器可在圆形和圆角方形之间切换。示例使用圆形和 63% 确定进度。
 
 <EffectGallery presets={[{ id: 'liquid-blob', options: { radius: 36, amplitude: 8 } }, { id: 'liquid-fill', options: { progress: 63 } }]} />
+
+### WebGL 流体演示
+
+融合液滴叠加各液滴的场强，以阈值决定轮廓是否连在一起。丝带以横向起伏和扭转明暗表现曲面。墨水扩散支持归一化波源位置和可复现的纹理种子。浏览器无法创建 WebGL 2 上下文时显示静态姿态。
+
+<EffectGallery presets={[{ id: 'metaball', options: { radius: 18, travel: 24 } }, { id: 'fluid-ribbon', options: { length: 140, width: 18 } }, 'ink-diffusion']} />
 
 ## 05 文字动效
 

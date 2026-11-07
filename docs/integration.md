@@ -126,6 +126,6 @@ document.body.append(element);
 | `pause()` / `resume()` | 手动暂停或恢复。画布回到视口时仍尊重手动暂停 |
 | `trigger([x, y])` | 为交互涟漪提供相对容器的坐标，两个分量均为 0–1 |
 | `destroy()` | 释放渲染节点、观察器和帧回调。可重复调用 |
-| `renderer` | 读取实际渲染器，可能是 `css`、`canvas` 或 `static` |
+| `renderer` | 读取实际渲染器，可能是 `css`、`canvas`、`webgl` 或 `static` |
 
 换动效时，Vanilla JS 应先销毁旧实例，再以新 ID 创建。框架适配会在更换动效或注册表时重建实例。离开视口会冻结时间轴，返回后继续已有相位。使用 `reducedMotion: 'static'` 可强制静态展示，默认 `system` 跟随系统设置。更多行为见[技术设计](architecture.md)。

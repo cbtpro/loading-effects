@@ -3,7 +3,7 @@ import type { EffectDefinition, LoadingField } from '@loading-effects/core';
 export interface LoadingPreset extends EffectDefinition {
   title: string;
   description: string;
-  renderer: 'canvas' | 'css';
+  renderer: 'canvas' | 'css' | 'webgl';
   schema: Record<string, LoadingField>;
 }
 
@@ -47,3 +47,7 @@ export const scrambleText: LoadingPreset;
 
 export const liquidBlob: LoadingPreset;
 export const liquidFill: LoadingPreset;
+
+export const metaball: LoadingPreset;
+export const fluidRibbon: LoadingPreset;
+export const inkDiffusion: LoadingPreset;

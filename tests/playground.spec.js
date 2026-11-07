@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('card configuration, completion and rendering stay independent', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.effect-card')).toHaveCount(35);
+  await expect(page.locator('.effect-card')).toHaveCount(38);
   await expect(page.locator('.code-example[open]')).toHaveCount(0);
 
   const wave = page.locator('#dot-matrix-wave');
@@ -133,16 +133,19 @@ test('reduced motion keeps the interactive preview static at a narrow viewport',
   await expect.poll(() => canvas.evaluate((node, stillFrame) => node.toDataURL() !== stillFrame, still)).toBe(true);
 });
 
-test('all 35 presets render when their previews enter the viewport', async ({ page }) => {
+test('all 38 presets render when their previews enter the viewport', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('.effect-card');
-  await expect(cards).toHaveCount(35);
+  await expect(cards).toHaveCount(38);
 
   for (const card of await cards.all()) {
     await card.locator('.preview').scrollIntoViewIfNeeded();
     const renderer = await card.getAttribute('data-renderer');
     if (renderer === 'canvas') {
       await expect.poll(() => card.locator('canvas').evaluate(canvas => canvas.width)).toBeGreaterThan(0);
+    } else if (renderer === 'webgl') {
+      await expect(card.locator('[data-part="renderer"]')).toHaveText(/WebGL 2|静态备用图形/);
+      await expect(card.locator('.surface > :visible')).toHaveCount(1);
     } else if (await card.locator('xpath=ancestor::section[@id="text-effects"]').count()) {
       await expect(card.locator('.surface > div > span')).toBeVisible();
     } else if (await card.getAttribute('data-skeleton') !== null || await card.getAttribute('data-task-progress') !== null) {
@@ -346,4 +349,77 @@ test('liquid fill clips to its selected shape and preserves real progress', asyn
   await expect.poll(() => alpha(true)).toBe(255);
   await expect(card.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
   await expect(card.locator('[data-part="ready"]')).toBeHidden();
+});
+
+test('WebGL fluid demos fall back cleanly without WebGL', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      return type === 'webgl2' ? null : original.call(this, type, ...args);
+    };
+  });
+  await page.goto('/');
+  for (const id of ['metaball', 'fluid-ribbon', 'ink-diffusion']) {
+    const card = page.locator('#' + id);
+    await expect(card.locator('[data-part="renderer"]')).toHaveText('静态备用图形');
+    await expect(card.locator('canvas')).toBeHidden();
+    await expect(card.locator('.surface > div')).toBeVisible();
+    expect(await card.locator('.surface > div').evaluate(node => getComputedStyle(node).backgroundImage)).not.toBe('none');
+  }
+});
+
+test('WebGL fluid shaders draw pixels and recover from context loss', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Chromium uses a pinned software WebGL renderer for pixel checks.');
+  await page.addInitScript(() => {
+    const draw = WebGL2RenderingContext.prototype.drawArrays;
+    WebGL2RenderingContext.prototype.drawArrays = function (...args) {
+      draw.apply(this, args);
+      const id = this.canvas.closest('article')?.id;
+      if (id !== window.captureWebGL) return;
+      window.captureWebGL = null;
+      const { drawingBufferWidth: width, drawingBufferHeight: height } = this;
+      const pixels = new Uint8Array(width * height * 4);
+      this.readPixels(0, 0, width, height, this.RGBA, this.UNSIGNED_BYTE, pixels);
+      let count = 0;
+      let hash = 0;
+      for (let index = 3; index < pixels.length; index += 4) {
+        if (pixels[index]) count++;
+        hash = (Math.imul(hash, 31) + pixels[index]) >>> 0;
+      }
+      window.webGLSample = { count, hash };
+    };
+  });
+  await page.goto('/');
+
+  const capture = async id => {
+    const card = page.locator('#' + id);
+    await expect(card.locator('[data-part="renderer"]')).toHaveText('WebGL 2');
+    await card.locator('.preview').scrollIntoViewIfNeeded();
+    await page.evaluate(id => {
+      window.webGLSample = null;
+      window.captureWebGL = id;
+    }, id);
+    await page.waitForFunction(() => window.webGLSample);
+    return page.evaluate(() => window.webGLSample);
+  };
+
+  for (const id of ['metaball', 'fluid-ribbon', 'ink-diffusion']) {
+    const initial = await capture(id);
+    expect(initial.count).toBeGreaterThan(50);
+    await page.waitForTimeout(140);
+    expect((await capture(id)).hash).not.toBe(initial.hash);
+  }
+
+  const card = page.locator('#ink-diffusion');
+  const canvas = card.locator('canvas');
+  await canvas.evaluate(node => {
+    const extension = node.getContext('webgl2').getExtension('WEBGL_lose_context');
+    node.addEventListener('webglcontextlost', () => setTimeout(() => extension.restoreContext(), 800), { once: true });
+    extension.loseContext();
+  });
+  await expect(canvas).toBeHidden();
+  await expect(card.locator('[data-part="renderer"]')).toHaveText('静态备用图形');
+  await expect(card.locator('.surface > div')).toBeVisible();
+  await expect(canvas).toBeVisible();
+  expect((await capture('ink-diffusion')).count).toBeGreaterThan(50);
 });

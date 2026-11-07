@@ -3,11 +3,12 @@ import { LoadingEffect } from '@loading-effects/react';
 import * as effects from '@loading-effects/effects';
 import { createCssRenderer } from '@loading-effects/renderer-css';
 import { createCanvasRenderer } from '@loading-effects/renderer-canvas';
+import { createWebGLRenderer } from '@loading-effects/renderer-webgl';
 import styles from './EffectDemo.module.css';
 
 const registry = {
   effects: Object.fromEntries(Object.values(effects).map(effect => [effect.id, effect])),
-  renderers: { css: createCssRenderer, canvas: createCanvasRenderer },
+  renderers: { css: createCssRenderer, canvas: createCanvasRenderer, webgl: createWebGLRenderer },
 };
 const defaults = Object.freeze({});
 
@@ -33,7 +34,7 @@ export default function EffectDemo({ id, options = defaults, completion = false 
 
   return (
     <figure className={styles.demo} data-effect={id}>
-      <div className={styles.preview} data-canvas={effect.renderer === 'canvas'}>
+      <div className={styles.preview} data-canvas={effect.renderer !== 'css'}>
         {ready ? (
           <div className={styles.ready} role="status">预览已就绪</div>
         ) : (

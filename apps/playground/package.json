@@ -12,7 +12,8 @@
     "@loading-effects/core": "workspace:*",
     "@loading-effects/effects": "workspace:*",
     "@loading-effects/renderer-canvas": "workspace:*",
-    "@loading-effects/renderer-css": "workspace:*"
+    "@loading-effects/renderer-css": "workspace:*",
+    "@loading-effects/renderer-webgl": "workspace:*"
   },
   "devDependencies": {
     "vite": "^8.3.6"

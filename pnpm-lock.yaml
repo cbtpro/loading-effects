@@ -35,6 +35,9 @@ importers:
       '@loading-effects/renderer-css':
         specifier: workspace:*
         version: link:../../packages/renderer-css
+      '@loading-effects/renderer-webgl':
+        specifier: workspace:*
+        version: link:../../packages/renderer-webgl
       '@mdx-js/react':
         specifier: ^3.0.0
         version: 3.1.1(@types/react@19.3.0)(react@19.3.1)
@@ -59,6 +62,9 @@ importers:
       '@loading-effects/renderer-css':
         specifier: workspace:*
         version: link:../../packages/renderer-css
+      '@loading-effects/renderer-webgl':
+        specifier: workspace:*
+        version: link:../../packages/renderer-webgl
     devDependencies:
       vite:
         specifier: ^8.3.6
@@ -81,6 +87,9 @@ importers:
       '@loading-effects/renderer-css':
         specifier: workspace:*
         version: link:../../packages/renderer-css
+      '@loading-effects/renderer-webgl':
+        specifier: workspace:*
+        version: link:../../packages/renderer-webgl
       '@loading-effects/vue':
         specifier: workspace:*
         version: link:../../packages/vue
@@ -130,7 +139,11 @@ importers:
         specifier: workspace:*
         version: link:../core
 
-  packages/renderer-webgl: {}
+  packages/renderer-webgl:
+    dependencies:
+      '@loading-effects/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/vue:
     dependencies:

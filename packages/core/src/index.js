@@ -178,6 +178,7 @@ export function createLoading(element, { effect: id, ...input }, registry) {
     replaceOptions({ ...input, ...patch });
   }
 
+  renderer.setRefresh?.(refresh);
   renderer.update(options);
   resizeObserver.observe(element);
   intersectionObserver.observe(element);
@@ -187,7 +188,7 @@ export function createLoading(element, { effect: id, ...input }, registry) {
   resize();
 
   return {
-    renderer: renderer.name,
+    get renderer() { return renderer.name; },
     update,
     replaceOptions,
     pause: () => update({ paused: true }),

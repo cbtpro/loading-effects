@@ -17,6 +17,7 @@
     "@loading-effects/effects": "workspace:*",
     "@loading-effects/react": "workspace:*",
     "@loading-effects/renderer-css": "workspace:*",
-    "@loading-effects/renderer-canvas": "workspace:*"
+    "@loading-effects/renderer-canvas": "workspace:*",
+    "@loading-effects/renderer-webgl": "workspace:*"
   }
 }

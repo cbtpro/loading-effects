@@ -211,3 +211,5 @@ export { shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal } 
 export { typingDots, characterWave, textShimmer, scrambleText } from './text.js';
 
 export { liquidBlob, liquidFill } from './liquid.js';
+
+export { metaball, fluidRibbon, inkDiffusion } from './fluid-webgl.js';

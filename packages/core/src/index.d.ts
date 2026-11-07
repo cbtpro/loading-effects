@@ -31,6 +31,7 @@ export interface LoadingRenderer {
   update(options: LoadingOptions): void;
   render(elapsed: number, options: LoadingOptions, still: boolean): void;
   isActive?(): boolean;
+  setRefresh?(refresh: () => void): void;
   trigger?(origin: [number, number], elapsed: number, options: LoadingOptions): void;
   destroy(): void;
 }

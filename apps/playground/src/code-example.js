@@ -4,9 +4,9 @@ export function buildExample(effect, framework, language, options) {
   const vue = framework === 'vue';
   const interactive = effect.id === 'interactive-ripple';
   const preset = effect.id.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-  const canvas = effect.renderer === 'canvas';
+  const canvas = effect.renderer !== 'css';
   const text = Boolean(effect.schema.text);
-  const renderer = canvas ? 'createCanvasRenderer' : 'createCssRenderer';
+  const renderer = { canvas: 'createCanvasRenderer', css: 'createCssRenderer', webgl: 'createWebGLRenderer' }[effect.renderer];
   if (framework === 'web-components') {
     const size = canvas ? 'width: 100%; height: 240px;' : 'width: min(100%, 360px); height: 100px;';
     return `import { defineLoadingEffect } from '@loading-effects/web-components';

@@ -1,7 +1,11 @@
 {
   "name": "@loading-effects/renderer-webgl",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.3",
   "private": true,
   "type": "module",
-  "description": "WebGL 渲染器"
+  "description": "WebGL 渲染器",
+  "exports": "./src/index.js",
+  "dependencies": {
+    "@loading-effects/core": "workspace:*"
+  }
 }

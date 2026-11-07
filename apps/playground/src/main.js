@@ -4,12 +4,13 @@ import {
   circularProgress, gradientProgress, segmentedProgress, stepProgress, waveProgress,
   particleFlow, particleConvergence, particleExplosion, particleOrbit, particleMorph, particleNetwork,
   shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal,
-  liquidBlob, liquidFill,
+  liquidBlob, liquidFill, metaball, fluidRibbon, inkDiffusion,
   typingDots, characterWave, textShimmer, scrambleText,
   dotMatrixWave, radialRipple, directionalWave, matrixBreathing, matrixVortex, interactiveRipple,
 } from '@loading-effects/effects';
 import { createCssRenderer } from '@loading-effects/renderer-css';
 import { createCanvasRenderer } from '@loading-effects/renderer-canvas';
+import { createWebGLRenderer } from '@loading-effects/renderer-webgl';
 import { buildExample } from './code-example.js';
 import './style.css';
 
@@ -18,7 +19,7 @@ const groups = [
   ['progress-effects', '进度反馈', [circularProgress, gradientProgress, segmentedProgress, stepProgress, waveProgress]],
   ['particle-effects', '粒子系统', [particleFlow, particleConvergence, particleExplosion, particleOrbit, particleMorph, particleNetwork]],
   ['skeleton-effects', '骨架占位', [shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal]],
-  ['liquid-effects', '流体与液态', [liquidBlob, liquidFill]],
+  ['liquid-effects', '流体与液态', [liquidBlob, liquidFill, metaball, fluidRibbon, inkDiffusion]],
   ['text-effects', '文字动效', [typingDots, characterWave, textShimmer, scrambleText]],
   ['geometry-effects', '基础几何', [circularSpinner, bouncingDots, pulseCircle, rotatingSquares, orbitDots, elasticLine, morphingShape, flipTiles]],
 ];
@@ -26,7 +27,7 @@ const effects = groups.flatMap(([, , presets]) => presets);
 const media = matchMedia('(prefers-reduced-motion: reduce)');
 const registry = {
   effects: Object.fromEntries(effects.map(effect => [effect.id, effect])),
-  renderers: { canvas: createCanvasRenderer, css: createCssRenderer },
+  renderers: { canvas: createCanvasRenderer, css: createCssRenderer, webgl: createWebGLRenderer },
 };
 const template = document.querySelector('#effect-card');
 
@@ -272,6 +273,13 @@ function mountCard(card, effect) {
     trigger.disabled = completed || paused || forceStatic.checked || media.matches || loading?.renderer !== 'canvas';
   }
 
+  function showRenderer(name) {
+    get('renderer').textContent = {
+      canvas: 'Canvas 2D', webgl: 'WebGL 2', css: 'CSS / DOM', static: '静态备用图形',
+    }[name];
+  }
+  surface.addEventListener('loading-renderer-change', event => showRenderer(event.detail));
+
   function start() {
     clearPreview();
     completed = false;
@@ -294,7 +302,7 @@ function mountCard(card, effect) {
     pause.setAttribute('aria-pressed', 'false');
     finish.disabled = false;
     loading = createLoading(surface, { effect: effect.id }, registry);
-    get('renderer').textContent = { canvas: 'Canvas 2D', css: 'CSS / DOM', static: '静态备用图形' }[loading.renderer];
+    showRenderer(loading.renderer);
     if (effect === waveProgress || effect === liquidFill) progress.classList.toggle('sr-only', loading.renderer === 'canvas');
     if (effect.reveal) {
       setOption('content', {
