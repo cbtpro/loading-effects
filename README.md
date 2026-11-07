@@ -41,7 +41,7 @@ pnpm --filter @loading-effects/example-frameworks dev --port 4174
 
 ## 文档
 
-在线文档见 [Loading Effects 文档站](https://cbtpro.github.io/loading-effects/)。Docusaurus 直接读取根目录的文档与图片，本地运行方式见[文档站运行与部署说明](apps/docs/README.md)。
+在线文档见 [Loading Effects 文档站](https://blog.chenbitao.com/loading-effects/)。Docusaurus 直接读取根目录的文档与图片，本地运行方式见[文档站运行与部署说明](apps/docs/README.md)。
 
 - [接入指南与生命周期](docs/integration.md)
 - [产品需求与里程碑](docs/product-requirements.md)
