@@ -30,9 +30,6 @@ h3 { margin: 0; font-size: 1.0625rem; }
   top: 16px;
   z-index: 1;
   min-width: 0;
-  max-height: calc(100dvh - 32px);
-  overflow-y: auto;
-  scrollbar-width: thin;
   padding-block: 4px;
 }
 .nav-heading {
@@ -43,49 +40,36 @@ h3 { margin: 0; font-size: 1.0625rem; }
   color: #465973;
   font-size: .8125rem;
 }
+.nav-toggle { display: none; }
+.nav-panel { max-height: calc(100dvh - 64px); overflow: auto; scrollbar-width: thin; }
 .nav-track { position: relative; }
-.nav-track::before {
-  content: "";
-  position: absolute;
-  inset-block: 0;
-  left: 2.5px;
-  width: 1px;
-  background: #ccd7e7;
-  pointer-events: none;
-}
 .nav-list, .nav-effects { display: grid; margin: 0; padding: 0; list-style: none; }
 .group-nav a {
-  display: flex;
+  display: block;
   position: relative;
-  align-items: center;
-  min-height: 32px;
-  padding: 4px 8px 4px 16px;
+  padding: 6px 8px 6px 14px;
   color: #465973;
-  font-size: .8125rem;
+  font-size: .875rem;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
   text-decoration: none;
-  white-space: nowrap;
   transition: color 160ms ease;
 }
-.group-nav a:hover, .group-nav a[aria-current], .nav-group-link[data-active] { color: #2359be; }
+.group-nav a:hover { color: #16243b; }
+.group-nav a[data-active] { color: #2359be; }
 .group-nav a:focus-visible { outline-offset: -2px; }
-.group-nav a[aria-current], .nav-group-link[data-active] { font-weight: 650; }
-.nav-effects a {
-  min-height: 28px;
-  padding-left: 30px;
-  font-size: .75rem;
-  white-space: normal;
-}
-.nav-mobile-effects { display: none; }
-.nav-indicator {
+.nav-effects a { padding-inline-start: 26px; }
+.nav-rail {
   position: absolute;
   top: 0;
   left: 0;
-  width: 2px;
-  height: 0;
-  color: #2359be;
-  transform: translate(var(--indicator-left, 0px), var(--indicator-top, 0px));
-  transition: transform 200ms ease-out, height 200ms ease-out;
+  color: #ccd7e7;
   pointer-events: none;
+}
+.nav-indicator {
+  color: #2359be;
+  clip-path: inset(var(--thumb-top, 0px) 0 var(--thumb-bottom, 100%));
+  transition: clip-path 200ms ease-out;
 }
 
 #effects { grid-area: effects; min-width: 0; }
@@ -233,19 +217,42 @@ output { font-variant-numeric: tabular-nums; }
   .code-example { grid-area: code; }
 }
 
-@media (max-width: 800px) {
+@media (width < 1280px) {
   .playground {
     grid-template: "heading" auto "nav" auto "effects" 1fr / minmax(0, 1fr);
     gap: 12px;
     padding-top: 16px;
   }
-  .group-nav { top: 0; max-height: none; padding: 4px; border: 1px solid #d8e1ee; border-radius: 12px; background: #fff; }
-  .nav-heading, .nav-track::before, .nav-indicator { display: none; }
-  .group-nav a { min-height: 34px; padding-inline: 8px; border-radius: 6px; white-space: nowrap; }
-  .group-nav a[aria-current], .nav-group-link[data-active] { background: #eaf2ff; }
-  .nav-list, .nav-effects { display: flex; overflow-x: auto; scrollbar-width: thin; }
-  .nav-list li, .nav-effects li { flex: none; }
-  .nav-mobile-effects { display: block; border-top: 1px solid #d8e1ee; margin-top: 3px; padding-top: 3px; }
-  .nav-list .nav-effects { display: none; }
-  .effect-group, .effect-card { scroll-margin-top: 102px; }
+  .group-nav {
+    top: 0;
+    padding: 0;
+    border-bottom: 1px solid #d8e1ee;
+    background: #f3f6fbf2;
+    backdrop-filter: blur(10px);
+  }
+  .nav-heading, .group-nav:not([data-open]) .nav-panel { display: none; }
+  .nav-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 36px;
+    border: 0;
+    background: transparent;
+    white-space: nowrap;
+  }
+  .nav-chevron { flex: none; color: #465973; }
+  .nav-current { overflow: hidden; color: #465973; text-overflow: ellipsis; }
+  .group-nav[data-open] .nav-chevron { transform: rotate(90deg); }
+  .group-nav[data-open] .nav-current { visibility: hidden; }
+  .nav-panel {
+    position: absolute;
+    inset: 100% 0 auto;
+    max-height: 50vh;
+    padding: 8px 12px;
+    border-bottom: 1px solid #d8e1ee;
+    background: #f3f6fb;
+    box-shadow: 0 8px 16px #16243b16;
+  }
+  .effect-group, .effect-card { scroll-margin-top: 52px; }
 }

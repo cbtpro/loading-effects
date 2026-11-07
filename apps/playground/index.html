@@ -20,13 +20,23 @@
           </svg>
           动效分类
         </p>
-        <div class="nav-track">
-          <ol class="nav-list"></ol>
-          <svg class="nav-indicator" viewBox="0 0 2 1" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-            <rect width="2" height="1" fill="currentColor"/>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="effect-nav-panel">
+          本页目录
+          <svg class="nav-chevron" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+            <path d="m6 4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/>
           </svg>
+          <span class="nav-current"></span>
+        </button>
+        <div class="nav-panel" id="effect-nav-panel">
+          <div class="nav-track">
+            <svg class="nav-rail" width="12" aria-hidden="true" focusable="false">
+              <defs><path id="effect-nav-path" fill="none" stroke="currentColor"/></defs>
+              <use href="#effect-nav-path"/>
+              <use class="nav-indicator" href="#effect-nav-path"/>
+            </svg>
+            <ol class="nav-list"></ol>
+          </div>
         </div>
-        <div class="nav-mobile-effects"></div>
       </nav>
       <main id="effects" aria-label="动效预览"></main>
     </div>

@@ -1,42 +1,34 @@
 import { expect, test } from '@playwright/test';
 
-test('right sidebar shows both levels and moves one indicator to the current link', async ({ page }) => {
+test('right sidebar follows heading depth and highlights a range on the shared SVG rail', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 850 });
   await page.goto('/');
   const nav = page.getByRole('navigation', { name: '动效分类' });
   const current = nav.locator('[aria-current="location"]');
-  const indicator = nav.locator('svg.nav-indicator');
-  const expectIndicatorByLabel = async () => {
-    await expect.poll(async () => {
-      const label = await current.locator('span').boundingBox();
-      const mark = await indicator.boundingBox();
-      return [
-        Math.round(label.x - mark.x - mark.width),
-        Math.round(mark.y - label.y),
-        Math.round(mark.height - label.height),
-      ];
-    }).toEqual([4, 0, 0]);
-  };
+  const rail = nav.locator('svg.nav-rail');
+  const indicator = rail.locator('.nav-indicator');
   await expect(nav.getByRole('link')).toHaveCount(45);
-  await expect(indicator).toBeVisible();
-  await expect(indicator.locator('rect')).toHaveAttribute('fill', 'currentColor');
+  await expect(rail.locator('path')).toHaveAttribute('d', /^M1 .*L11 .*L1 /);
+  await expect(indicator).toHaveAttribute('href', '#effect-nav-path');
   const sidebar = await nav.boundingBox();
   const preview = await page.locator('#dot-matrix-wave').boundingBox();
   expect(sidebar.x).toBeGreaterThan(preview.x + preview.width);
 
-  await nav.getByRole('link', { name: '粒子系统', exact: true }).click();
-  await expect(page).toHaveURL(/#particle-effects$/);
-  await expect(current).toHaveText('粒子系统');
-  await expectIndicatorByLabel();
-
   await nav.getByRole('link', { name: '粒子网络', exact: true }).click();
   await expect(page).toHaveURL(/#particle-network$/);
   await expect(current).toHaveText('粒子网络');
-  await expectIndicatorByLabel();
 
-  await page.locator('#particle-flow').evaluate(card => {
-    window.scrollBy(0, card.getBoundingClientRect().top - window.innerHeight / 2 + 4);
+  await page.locator('#geometry-effects').evaluate(section => {
+    window.scrollBy(0, section.getBoundingClientRect().top - 40);
   });
-  await expect(current).toHaveText('粒子流');
+  await expect(nav.getByRole('link', { name: '基础几何', exact: true })).toHaveAttribute('data-active', '');
+  await expect.poll(() => nav.locator('[data-active]').count()).toBeGreaterThan(1);
+  await expect.poll(() => rail.evaluate(node => {
+    const top = parseFloat(node.style.getPropertyValue('--thumb-top'));
+    const bottom = parseFloat(node.style.getPropertyValue('--thumb-bottom'));
+    return Number(node.getAttribute('height')) - top - bottom;
+  })).toBeGreaterThan(32);
+
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const lastEffect = page.locator('.effect-card h3').last();
   await expect(current).toHaveText(await lastEffect.textContent());
@@ -44,17 +36,18 @@ test('right sidebar shows both levels and moves one indicator to the current lin
   await expect(indicator).toHaveCSS('transition-duration', '0s');
 });
 
-test('narrow view keeps category links accessible without covering anchor targets', async ({ page }) => {
+test('narrow view opens a directory and closes it after navigating', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/#particle-network');
   const nav = page.getByRole('navigation', { name: '动效分类' });
-  const current = nav.locator('.nav-group-link[data-active]');
-  const currentEffect = nav.locator('[aria-current="location"]');
-  await expect(current).toHaveText(/粒子系统/);
-  await expect(currentEffect).toHaveText('粒子网络');
-  await nav.getByRole('link', { name: '基础几何' }).click();
-  await expect(current).toHaveText(/基础几何/);
-  await expect(currentEffect).toHaveText('基础几何');
+  const toggle = nav.getByRole('button', { name: /本页目录/ });
+  await expect(toggle).toContainText('粒子网络');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await nav.getByRole('link', { name: '基础几何', exact: true }).click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toContainText('基础几何');
   const heading = await page.getByRole('heading', { name: '基础几何' }).boundingBox();
   const menu = await nav.boundingBox();
   expect(heading.y).toBeGreaterThan(menu.y + menu.height);
