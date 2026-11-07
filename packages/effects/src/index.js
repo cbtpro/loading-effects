@@ -209,3 +209,5 @@ export { particleFlow, particleConvergence, particleExplosion, particleOrbit, pa
 export { shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal } from './skeleton.js';
 
 export { typingDots, characterWave, textShimmer, scrambleText } from './text.js';
+
+export { liquidBlob, liquidFill } from './liquid.js';

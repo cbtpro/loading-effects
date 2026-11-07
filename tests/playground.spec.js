@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('card configuration, completion and rendering stay independent', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.effect-card')).toHaveCount(33);
+  await expect(page.locator('.effect-card')).toHaveCount(35);
   await expect(page.locator('.code-example[open]')).toHaveCount(0);
 
   const wave = page.locator('#dot-matrix-wave');
@@ -133,10 +133,10 @@ test('reduced motion keeps the interactive preview static at a narrow viewport',
   await expect.poll(() => canvas.evaluate((node, stillFrame) => node.toDataURL() !== stillFrame, still)).toBe(true);
 });
 
-test('all 33 presets render when their previews enter the viewport', async ({ page }) => {
+test('all 35 presets render when their previews enter the viewport', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('.effect-card');
-  await expect(cards).toHaveCount(33);
+  await expect(cards).toHaveCount(35);
 
   for (const card of await cards.all()) {
     await card.locator('.preview').scrollIntoViewIfNeeded();
@@ -318,4 +318,32 @@ test('text effects keep graphemes intact and remain readable with reduced motion
   await scramble.getByLabel('文字', { exact: true }).fill('完成✅');
   await scramble.locator('.preview').scrollIntoViewIfNeeded();
   await expect(scramble.locator('.surface > div > span > span > span:last-child')).toHaveText(['完', '成', '✅']);
+});
+
+test('liquid fill clips to its selected shape and preserves real progress', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const card = page.locator('#liquid-fill');
+  await card.getByText('参数与演示进度', { exact: true }).click();
+  await card.getByLabel('显示数值', { exact: true }).uncheck();
+  await card.getByLabel('进度模式').selectOption('actual');
+  const canvas = card.locator('canvas');
+  const alpha = (corner = false) => canvas.evaluate((node, corner) => {
+    const size = Math.min(node.clientWidth * .8, node.clientHeight * .76, 132);
+    const offset = corner ? size * .4 : 0;
+    const x = Math.floor((node.clientWidth / 2 - offset) * node.width / node.clientWidth);
+    const y = Math.floor((node.clientHeight / 2 - offset) * node.height / node.clientHeight);
+    return node.getContext('2d').getImageData(x, y, 1, 1).data[3];
+  }, corner);
+  await card.locator('.preview').scrollIntoViewIfNeeded();
+  await expect.poll(() => alpha()).toBeLessThan(50);
+  await card.getByLabel('进度值', { exact: false }).fill('100');
+  await card.locator('.preview').scrollIntoViewIfNeeded();
+  await expect.poll(() => alpha()).toBe(255);
+  expect(await alpha(true)).toBe(0);
+  await card.getByLabel('容器形状').selectOption('rounded-square');
+  await card.locator('.preview').scrollIntoViewIfNeeded();
+  await expect.poll(() => alpha(true)).toBe(255);
+  await expect(card.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
+  await expect(card.locator('[data-part="ready"]')).toBeHidden();
 });

@@ -10,7 +10,7 @@
 pnpm install --frozen-lockfile
 ```
 
-Playground 已接入 33 种预设。`v1.0.0-alpha.1` 在 v0.2 的基础上增加输入省略号、字符波浪、文字流光和字符解码。
+Playground 已接入 35 种预设。`v1.0.0-alpha.2` 增加液态形变和液位填充。
 
 ```sh
 pnpm --filter @loading-effects/app-playground dev --port 4173

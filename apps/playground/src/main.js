@@ -4,6 +4,7 @@ import {
   circularProgress, gradientProgress, segmentedProgress, stepProgress, waveProgress,
   particleFlow, particleConvergence, particleExplosion, particleOrbit, particleMorph, particleNetwork,
   shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal,
+  liquidBlob, liquidFill,
   typingDots, characterWave, textShimmer, scrambleText,
   dotMatrixWave, radialRipple, directionalWave, matrixBreathing, matrixVortex, interactiveRipple,
 } from '@loading-effects/effects';
@@ -17,6 +18,7 @@ const groups = [
   ['progress-effects', '进度反馈', [circularProgress, gradientProgress, segmentedProgress, stepProgress, waveProgress]],
   ['particle-effects', '粒子系统', [particleFlow, particleConvergence, particleExplosion, particleOrbit, particleMorph, particleNetwork]],
   ['skeleton-effects', '骨架占位', [shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal]],
+  ['liquid-effects', '流体与液态', [liquidBlob, liquidFill]],
   ['text-effects', '文字动效', [typingDots, characterWave, textShimmer, scrambleText]],
   ['geometry-effects', '基础几何', [circularSpinner, bouncingDots, pulseCircle, rotatingSquares, orbitDots, elasticLine, morphingShape, flipTiles]],
 ];
@@ -293,7 +295,7 @@ function mountCard(card, effect) {
     finish.disabled = false;
     loading = createLoading(surface, { effect: effect.id }, registry);
     get('renderer').textContent = { canvas: 'Canvas 2D', css: 'CSS / DOM', static: '静态备用图形' }[loading.renderer];
-    if (effect === waveProgress) progress.classList.toggle('sr-only', loading.renderer === 'canvas');
+    if (effect === waveProgress || effect === liquidFill) progress.classList.toggle('sr-only', loading.renderer === 'canvas');
     if (effect.reveal) {
       setOption('content', {
         title: '加载动效示例',

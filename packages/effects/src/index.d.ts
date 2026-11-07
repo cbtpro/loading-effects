@@ -44,3 +44,6 @@ export const typingDots: LoadingPreset;
 export const characterWave: LoadingPreset;
 export const textShimmer: LoadingPreset;
 export const scrambleText: LoadingPreset;
+
+export const liquidBlob: LoadingPreset;
+export const liquidFill: LoadingPreset;

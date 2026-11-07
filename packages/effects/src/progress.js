@@ -210,6 +210,72 @@ export const stepProgress = {
   },
 };
 
+export const waveSchema = {
+  ...progressSchema,
+  amplitude: { default: 4, min: 0, max: 12, step: 1, label: '振幅（px）' },
+  wavelength: { default: 40, min: 12, max: 120, step: 1, label: '波长（px）' },
+  showValue: { type: 'boolean', default: true, label: '显示数值' },
+  transition: { default: 180, min: 0, max: 500, step: 10, label: '液面过渡（ms）' },
+};
+
+export const createWaveState = () => ({ target: null, level: 0, from: 0, start: 0 });
+
+export function drawWaveTank(ctx, tank, elapsed, options, state, _size, still) {
+  const { progress, progressSource, duration, transition, amplitude, wavelength, showValue, color, opacity } = options;
+  if (progress !== state.target) {
+    state.from = state.target === null ? progress ?? 0 : state.level;
+    state.target = progress;
+    state.start = elapsed;
+  }
+  const fraction = still || options.paused || transition === 0 ? 1 : Math.min(1, (elapsed - state.start) / transition);
+  state.level = progress === null ? 0 : state.from + (progress - state.from) * fraction;
+  const { x, y, width, height } = tank;
+  const radius = Math.min(8, height / 2, width / 2);
+  const phase = elapsed / duration * Math.PI * 2;
+  ctx.save();
+  ctx.beginPath();
+  if (tank.shape === 'circle') ctx.arc(x + width / 2, y + height / 2, width / 2, 0, Math.PI * 2);
+  else ctx.roundRect(x, y, width, height, radius);
+  ctx.clip();
+  ctx.fillStyle = color;
+  ctx.globalAlpha = .14 * opacity;
+  ctx.fillRect(x, y, width, height);
+  ctx.globalAlpha = opacity;
+  if (progress === null) {
+    const band = width * .28;
+    const left = still ? x + (width - band) / 2 : x - band + (width + band) * ((elapsed % duration) / duration);
+    ctx.fillRect(left, y + height / 2 - 2, band, 4);
+  } else if (state.level > 0) {
+    const level = height * state.level / 100;
+    const wave = Math.min(amplitude, level, height - level);
+    const bottom = y + height;
+    ctx.beginPath();
+    ctx.moveTo(x, bottom);
+    for (let dx = 0; dx < width; dx += 2) {
+      ctx.lineTo(x + dx, bottom - level + wave * Math.sin(dx / wavelength * Math.PI * 2 - phase));
+    }
+    ctx.lineTo(x + width, bottom - level + wave * Math.sin(width / wavelength * Math.PI * 2 - phase));
+    ctx.lineTo(x + width, bottom);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+  if (showValue) {
+    const label = progress === null ? '加载中' : `${progressSource === 'estimated' ? '预计 ' : ''}${progress}%`;
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.font = '12px system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const labelWidth = ctx.measureText(label).width + 14;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x + (width - labelWidth) / 2, y + height / 2 - 10, labelWidth, 20);
+    ctx.fillStyle = '#16243b';
+    ctx.fillText(label, x + width / 2, y + height / 2);
+    ctx.restore();
+  }
+}
+
 export const waveProgress = {
   id: 'wave-progress',
   title: '波浪进度',
@@ -217,71 +283,12 @@ export const waveProgress = {
   renderer: 'canvas',
   taskProgress: true,
   layoutFields: [],
-  schema: {
-    ...progressSchema,
-    amplitude: { default: 4, min: 0, max: 12, step: 1, label: '振幅（px）' },
-    wavelength: { default: 40, min: 12, max: 120, step: 1, label: '波长（px）' },
-    showValue: { type: 'boolean', default: true, label: '显示数值' },
-    transition: { default: 180, min: 0, max: 500, step: 10, label: '液面过渡（ms）' },
-  },
+  schema: waveSchema,
   prepare({ width, height }) {
     const tankWidth = Math.min(width * .85, 320);
     const tankHeight = Math.min(height * .58, 84);
     return { x: (width - tankWidth) / 2, y: (height - tankHeight) / 2, width: tankWidth, height: tankHeight };
   },
-  createState: () => ({ target: null, level: 0, from: 0, start: 0 }),
-  draw(ctx, tank, elapsed, options, state, _size, still) {
-    const { progress, progressSource, duration, transition, amplitude, wavelength, showValue, color, opacity } = options;
-    if (progress !== state.target) {
-      state.from = state.target === null ? progress ?? 0 : state.level;
-      state.target = progress;
-      state.start = elapsed;
-    }
-    const fraction = still || options.paused || transition === 0 ? 1 : Math.min(1, (elapsed - state.start) / transition);
-    state.level = progress === null ? 0 : state.from + (progress - state.from) * fraction;
-    const { x, y, width, height } = tank;
-    const radius = Math.min(8, height / 2, width / 2);
-    const phase = elapsed / duration * Math.PI * 2;
-    ctx.save();
-    ctx.beginPath();
-    ctx.roundRect(x, y, width, height, radius);
-    ctx.clip();
-    ctx.fillStyle = color;
-    ctx.globalAlpha = .14 * opacity;
-    ctx.fillRect(x, y, width, height);
-    ctx.globalAlpha = opacity;
-    if (progress === null) {
-      const band = width * .28;
-      const left = still ? x + (width - band) / 2 : x - band + (width + band) * ((elapsed % duration) / duration);
-      ctx.fillRect(left, y + height / 2 - 2, band, 4);
-    } else if (state.level > 0) {
-      const level = height * state.level / 100;
-      const wave = Math.min(amplitude, level, height - level);
-      const bottom = y + height;
-      ctx.beginPath();
-      ctx.moveTo(x, bottom);
-      for (let dx = 0; dx < width; dx += 2) {
-        ctx.lineTo(x + dx, bottom - level + wave * Math.sin(dx / wavelength * Math.PI * 2 - phase));
-      }
-      ctx.lineTo(x + width, bottom - level + wave * Math.sin(width / wavelength * Math.PI * 2 - phase));
-      ctx.lineTo(x + width, bottom);
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.restore();
-    if (showValue) {
-      const label = progress === null ? '加载中' : `${progressSource === 'estimated' ? '预计 ' : ''}${progress}%`;
-      ctx.save();
-      ctx.globalAlpha = opacity;
-      ctx.font = '12px system-ui';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const labelWidth = ctx.measureText(label).width + 14;
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(x + (width - labelWidth) / 2, y + height / 2 - 10, labelWidth, 20);
-      ctx.fillStyle = '#16243b';
-      ctx.fillText(label, x + width / 2, y + height / 2);
-      ctx.restore();
-    }
-  },
+  createState: createWaveState,
+  draw: drawWaveTank,
 };

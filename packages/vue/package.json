@@ -1,6 +1,6 @@
 {
   "name": "@loading-effects/vue",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "private": true,
   "type": "module",
   "description": "Vue 适配",
