@@ -4,9 +4,10 @@ test('right sidebar shows both levels and moves one indicator to the current lin
   await page.goto('/');
   const nav = page.getByRole('navigation', { name: '动效分类' });
   const current = nav.locator('[aria-current="location"]');
-  const indicator = nav.locator('.nav-indicator');
+  const indicator = nav.locator('svg.nav-indicator');
   await expect(nav.getByRole('link')).toHaveCount(45);
   await expect(indicator).toBeVisible();
+  await expect(indicator.locator('rect')).toHaveAttribute('fill', 'currentColor');
   const sidebar = await nav.boundingBox();
   const preview = await page.locator('#dot-matrix-wave').boundingBox();
   expect(sidebar.x).toBeGreaterThan(preview.x + preview.width);

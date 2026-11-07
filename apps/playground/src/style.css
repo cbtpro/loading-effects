@@ -82,7 +82,7 @@ h3 { margin: 0; font-size: 1.0625rem; }
   left: 2px;
   width: 2px;
   height: 0;
-  background: #2359be;
+  color: #2359be;
   transform: translateY(var(--indicator-top, 0px));
   transition: transform 200ms ease-out, height 200ms ease-out;
   pointer-events: none;
