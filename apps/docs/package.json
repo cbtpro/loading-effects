@@ -13,6 +13,10 @@
     "@docusaurus/preset-classic": "3.10.2",
     "@mdx-js/react": "^3.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@loading-effects/effects": "workspace:*",
+    "@loading-effects/react": "workspace:*",
+    "@loading-effects/renderer-css": "workspace:*",
+    "@loading-effects/renderer-canvas": "workspace:*"
   }
 }

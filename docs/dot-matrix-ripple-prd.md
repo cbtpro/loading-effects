@@ -1,3 +1,5 @@
+import EffectDemo from '@site/src/components/EffectDemo';
+
 # 点阵波纹式画布加载动画 PRD
 
 ## 功能概述
@@ -10,15 +12,11 @@
 
 ![ChatGPT 图片生成的画布加载截图](assets/chatgpt-image-generation-loading.png)
 
-## Playground 实现截图
+## 画布进度演示
 
-展开点阵波浪卡片的「参数与演示进度」，选择「确定进度」并将演示进度设为 `93%` 后，画布右下角显示百分比胶囊。
+下方组件使用点阵波浪，右下角显示 `93%` 演示进度。点击「模拟内容就绪」后，画布在原位置显示「预览已就绪」。点击「重新演示」可以恢复加载状态。
 
-![点阵波浪加载中，右下角显示 93% 演示进度](assets/playground-dot-matrix-loading.png)
-
-点击「模拟内容就绪」后，点阵与进度胶囊淡出，画布在原位置显示「预览已就绪」。当前演示以这行文字模拟结果。
-
-![模拟内容就绪后，点阵和进度胶囊已消失](assets/playground-dot-matrix-ready.png)
+<EffectDemo id="dot-matrix-wave" options={{ progress: 93 }} completion />
 
 ## 视觉设计
 

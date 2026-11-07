@@ -314,7 +314,7 @@ Vanilla JS · React · Vue · Web Components
 | 主题颜色 | 颜色选择 |
 | 导出操作 | 复制 React 示例代码 |
 
-原型的 React 组件调用是拟定 API。当前 Playground 纵向展示 6 种点阵与波纹预设，每张卡片支持实时调参、暂停和进度演示。启动步骤见[快速开始](index.md)，各预设的画面见 [Playground 实拍](dot-matrix-ripple.md#playground-实拍)。
+原型的 React 组件调用是拟定 API。当前 Playground 纵向展示 6 种点阵与波纹预设，每张卡片支持实时调参、暂停和进度演示。启动步骤见[快速开始](index.md)，各预设的画面见 [点阵与波纹演示](dot-matrix-ripple.md#点阵与波纹演示)。
 
 ### 原型源码
 

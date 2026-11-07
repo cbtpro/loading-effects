@@ -1,3 +1,5 @@
+import EffectDemo from '@site/src/components/EffectDemo';
+
 # 点阵波纹式画布加载
 
 产品场景与参考图见[点阵波纹 PRD](dot-matrix-ripple-prd.md)。
@@ -40,43 +42,43 @@ alpha = opacity * clamp(.13 + weight * (.18 + .5 * wave), 0, .9)
 
 径向版本把投影距离改成 `hypot(dx,dy)`，形成向外传播的环。可用 `crestWidth` 控制每个周期内波峰覆盖比例，在波峰两端平滑过渡。呼吸版本将空间相位限制在较小范围，形成近同步的起伏。漩涡使用角度与径向距离叠加。交互涟漪按触点生成有寿命的径向脉冲，限制同时存在的波源，动画层不能拦截宿主操作。
 
-## Playground 实拍
+## 点阵与波纹演示
 
 ### 09 点阵波浪
 
-默认从 35° 方向推进，中下部圆点更明显。截图中的 `93%` 来自演示进度控件。
+默认从 35° 方向推进，中下部圆点更明显。
 
-![点阵波浪与参数面板](assets/playground-dot-matrix-loading.png)
+<EffectDemo id="dot-matrix-wave" />
 
 ### 10 径向涟漪
 
 移动波源 X、Y 可以改变同心圆的起点。波峰宽度按周期比例设置，空间衰减控制远离波源时的对比度。
 
-![径向涟漪的同心波峰](assets/playground-radial-ripple.png)
+<EffectDemo id="radial-ripple" />
 
 ### 11 定向波浪
 
 默认以 0° 向右推进，空间衰减为 0。波峰数为「自动」时按波长排布。指定波峰数后，按画布在传播方向上的投影跨度重新分配波峰间距。
 
-![定向波浪的平行波峰](assets/playground-directional-wave.png)
+<EffectDemo id="directional-wave" />
 
 ### 12 点阵呼吸
 
-截图取自较亮的相位。相位差控制最远边缘相对中心的滞后，设为 0° 时全场同步明暗。
+相位差控制最远边缘相对中心的滞后，设为 0° 时全场同步明暗。
 
-![点阵呼吸处于较亮相位](assets/playground-matrix-breathing.png)
+<EffectDemo id="matrix-breathing" />
 
 ### 13 点阵漩涡
 
-螺旋臂数决定波源周围的波峰分布，扭转控制径向相位变化。截图将间距调为 `12 px`、扭转调为 `0.3`，便于看清三条螺旋臂。
+螺旋臂数决定波源周围的波峰分布，扭转控制径向相位变化。下方示例将间距调为 `12 px`、扭转调为 `0.3`，便于看清三条螺旋臂。
 
-![点阵漩涡的三条螺旋臂](assets/playground-matrix-vortex.png)
+<EffectDemo id="matrix-vortex" options={{ gap: 12, twist: 0.3 }} />
 
 ### 14 交互涟漪
 
-点击或轻触画布，从触点发出一圈涟漪。键盘可操作「从中心触发涟漪」按钮。波源达到上限时替换最早的一圈，全部消退后回到静态底图。截图使用 `48 px` 脉冲宽度，从中心触发后截取扩散中的一帧。
+点击或轻触画布，从触点发出一圈涟漪。键盘可操作「从中心触发涟漪」按钮。波源达到上限时替换最早的一圈，全部消退后回到静态底图。下方示例使用 `48 px` 脉冲宽度，点击「触发涟漪」可从中心观察扩散。
 
-![从中心触发后正在扩散的交互涟漪](assets/playground-interactive-ripple.png)
+<EffectDemo id="interactive-ripple" options={{ pulseWidth: 48 }} />
 
 ## 进度胶囊与退出
 

@@ -1,3 +1,5 @@
+import EffectDemo, { EffectGallery } from '@site/src/components/EffectDemo';
+
 # 动效目录
 
 对话中的分类说明、视觉参考图与 Playground 概念见[动效库构想](loading-effects-concept.md)。
@@ -17,21 +19,15 @@
 | 07 | morphing-shape · 形状变换 | 圆形、方形和菱形连续变换，回到圆形。 | `shapes=[circle,square,diamond]`，`cornerRadius=3`，`duration=2100` | CSS |
 | 08 | flip-tiles · 翻转方块 | 方块按行错峰沿指定轴翻转。 | `rows=2`，`columns=2`，`axis=y`，`tileSize=8`，`stagger=90` | CSS |
 
-### 基础几何实拍
+### 基础几何演示
 
-在 Playground 的「基础几何」分组中向下浏览，展开对应卡片即可实时调参。下图截取默认参数下的画布中央，保留动效的实际显示尺寸。
+以下组件按默认参数运行。需要调参时，可打开 [Playground 的基础几何分组](http://127.0.0.1:4173/#geometry-effects)。
 
-| 环形旋转 | 弹跳圆点 | 呼吸圆环 | 方块旋转 |
-| --- | --- | --- | --- |
-| ![环形旋转](assets/playground-circular-spinner.png) | ![弹跳圆点](assets/playground-bouncing-dots.png) | ![呼吸圆环](assets/playground-pulse-circle.png) | ![方块旋转](assets/playground-rotating-squares.png) |
-
-| 轨道圆点 | 弹性线条 | 形状变换 | 翻转方块 |
-| --- | --- | --- | --- |
-| ![轨道圆点](assets/playground-orbit-dots.png) | ![弹性线条](assets/playground-elastic-line.png) | ![形状变换](assets/playground-morphing-shape.png) | ![翻转方块](assets/playground-flip-tiles.png) |
+<EffectGallery presets={['circular-spinner', 'bouncing-dots', 'pulse-circle', 'rotating-squares', 'orbit-dots', 'elastic-line', 'morphing-shape', 'flip-tiles']} />
 
 ## 02 点阵与波纹
 
-本类 6 项在 Playground 的「点阵与波纹」分组中纵向展示，可分别实时调参。[查看实拍与操作说明](dot-matrix-ripple.md#playground-实拍)。
+本类 6 项在 Playground 的「点阵与波纹」分组中纵向展示，可分别实时调参。[查看动效演示与操作说明](dot-matrix-ripple.md#点阵与波纹演示)。
 
 | 编号 | 动效 ID · 名称 | 视觉与运动 | 专属参数及默认值 | 渲染 |
 | --- | --- | --- | --- | --- |
@@ -53,21 +49,11 @@
 | 19 | particle-morph · 粒子变形 | 粒子在等点数的目标形状之间重组。 | `targets=[circle,square]`，`count=180`，`hold=400`，`duration=2600` | Canvas 2D |
 | 20 | particle-network · 粒子网络 | 漂移粒子按距离连接，连线随距离淡出。 | `count=64`，`linkDistance=36`，`maxLinks=4`（每点），`velocity=16`（px/s） | Canvas 2D |
 
-### 粒子系统实拍
+### 粒子系统演示
 
-6 种粒子动效均使用 Canvas 2D，参数可在 Playground 中调节。布局使用确定性采样，滚动离开视口再回来时保留动画相位。粒子网络按连线距离划分网格，只比较相邻网格，并对连线两端同时应用数量上限。
+6 种粒子动效均使用 Canvas 2D。滚动离开视口时暂停绘制，返回后从原相位继续。粒子网络只比较相邻网格，并对连线两端同时应用数量上限。
 
-| 粒子流 | 粒子汇聚 |
-| --- | --- |
-| ![粒子流](assets/playground-particle-flow.png) | ![粒子汇聚](assets/playground-particle-convergence.png) |
-
-| 粒子爆发 | 粒子轨道 |
-| --- | --- |
-| ![粒子爆发](assets/playground-particle-explosion.png) | ![粒子轨道](assets/playground-particle-orbit.png) |
-
-| 粒子变形 | 粒子网络 |
-| --- | --- |
-| ![粒子变形](assets/playground-particle-morph.png) | ![粒子网络](assets/playground-particle-network.png) |
+<EffectGallery presets={['particle-flow', 'particle-convergence', 'particle-explosion', 'particle-orbit', 'particle-morph', 'particle-network']} />
 
 ## 04 流体与液态
 
@@ -88,19 +74,11 @@
 | 28 | text-shimmer · 文字流光 | 柔和高光沿字形移动。 | `text=Loading`，`highlightWidth=.28`（字宽比例），`direction=0`，`duration=1600` | CSS |
 | 29 | scramble-text · 字符解码 | 临时字符逐位锁定为目标文本，停留后进入下一轮。 | `text=Loading`，`alphabet=ABC012`，`tick=90`，`hold=500`，`seed=1` | CSS + DOM |
 
-### 文字动效实拍
+### 文字动效演示
 
-四种动效可在 Playground 中修改文字。输入省略号预留圆点宽度，字符解码按目标字形预留宽度，动画播放时保持行宽稳定。字符波浪和解码通过 `Intl.Segmenter` 按字素簇处理组合字符和 emoji。减少动态时直接显示可读的静态文字。
+输入省略号预留圆点宽度，字符解码按目标字形预留宽度。字符波浪和解码通过 `Intl.Segmenter` 按字素簇处理组合字符和 emoji。减少动态时直接显示静态文字。
 
-| 输入省略号 | 字符波浪 |
-| --- | --- |
-| ![输入省略号](assets/playground-typing-dots.png) | ![字符波浪与组合 emoji](assets/playground-character-wave.png) |
-
-| 文字流光 | 字符解码 |
-| --- | --- |
-| ![文字流光](assets/playground-text-shimmer.png) | ![字符逐位解码](assets/playground-scramble-text.png) |
-
-字符波浪截图使用「加载中 👩🏽‍💻」和 12 px 抬升高度，其余截图使用默认参数。
+<EffectGallery presets={['typing-dots', { id: 'character-wave', options: { text: '加载中 👩🏽‍💻', amplitude: 12 } }, 'text-shimmer', 'scramble-text']} />
 
 ## 06 进度反馈
 
@@ -112,29 +90,29 @@
 | 33 | step-progress · 阶段进度 | 节点显示已完成、当前和待开始状态，阶段由任务提供。 | `steps=[准备,处理,完成]`，`activeStep=0`（零基），`showLabels=true` | CSS |
 | 34 | wave-progress · 波浪进度 | 波形填充区域均值随进度更新，波峰横向移动。 | `amplitude=4`，`wavelength=40`，`showValue=true`，`transition=180` | Canvas 2D |
 
-### 进度反馈实拍
+### 进度反馈演示
 
 五种进度反馈均已接入 Playground。环形、渐变、分段和波浪进度由宿主通过 `progress` 提供 `0–100` 的数值，或用 `null` 表示未知进度。估算值通过 `progressSource: 'estimated'` 标识，画面与辅助技术均可区分。预览到达 `100%` 时保留进度，点击「模拟内容就绪」才退出。
 
 **环形进度**显示「预计 93%」。未知进度时，圆弧循环旋转。
 
-![Playground 环形进度显示预计 93%](assets/playground-circular-progress.png)
+<EffectDemo id="circular-progress" options={{ progress: 93, progressSource: 'estimated' }} />
 
 **渐变进度条**填充到 93%。播放时流光只在已填充区域内移动，静态预览保留填充长度。
 
-![Playground 渐变进度条填充至 93%](assets/playground-gradient-progress.png)
+<EffectDemo id="gradient-progress" options={{ progress: 93 }} />
 
 **分段进度**在 93% 时填满前九段，再填充第十段的 30%。关闭「允许部分填充」后只点亮已经完成的整段。
 
-![Playground 分段进度显示部分填充](assets/playground-segmented-progress.png)
+<EffectDemo id="segmented-progress" options={{ progress: 93 }} />
 
 **阶段进度**使用 `steps` 和零基下标 `activeStep`。示例当前处于「处理」，前一步已完成，后一步待开始。
 
-![Playground 阶段进度处于处理阶段](assets/playground-step-progress.png)
+<EffectDemo id="step-progress" options={{ activeStep: 1 }} />
 
 **波浪进度**的液面在 63% 附近起伏。静态模式保留当前液面，未知进度时显示横向移动的标记。
 
-![Playground 波浪进度显示 63%](assets/playground-wave-progress.png)
+<EffectDemo id="wave-progress" options={{ progress: 63 }} />
 
 ## 07 骨架屏
 
@@ -145,19 +123,13 @@
 | 37 | staggered-skeleton · 错峰骨架 | 多块占位按阅读顺序依次亮起并回落。 | `layout=text-lines`，`stagger=100`，`minOpacity=.6` | CSS |
 | 38 | progressive-reveal · 渐进揭示 | 各区内容就绪后独立替换骨架，保留布局。 | `layout=text-lines`，`readyKeys=[]`，`fadeDuration=180` | CSS |
 
-### 骨架占位实拍
+### 骨架占位演示
 
 四种骨架共用 `text-lines` 和 `article-card` 布局。流光、呼吸和错峰骨架在减少动态模式下保留静态占位。
 
-渐进揭示通过 `content` 接收 `title`、`body`、`footer` 三个区域的文本。宿主把已就绪的键传给 `readyKeys`，对应区域独立显示文本，宽高保持一致。下图只揭示标题，正文和补充信息仍保留占位。
+渐进揭示通过 `content` 接收区域文本。宿主将已就绪的键传给 `readyKeys`，对应区域显示内容并保留宽高。下方示例先揭示标题，正文和补充信息仍保留占位。
 
-| 流光骨架 | 呼吸骨架 |
-| --- | --- |
-| ![流光骨架](assets/playground-shimmer-skeleton.png) | ![呼吸骨架](assets/playground-pulse-skeleton.png) |
-
-| 错峰骨架 | 渐进揭示 |
-| --- | --- |
-| ![错峰骨架](assets/playground-staggered-skeleton.png) | ![渐进揭示已显示标题](assets/playground-progressive-reveal.png) |
+<EffectGallery presets={['shimmer-skeleton', 'pulse-skeleton', 'staggered-skeleton', { id: 'progressive-reveal', options: { readyKeys: ['title'], content: { title: '加载动效示例', body: '各区域随任务结果独立显示。', footer: '已读取本地数据' } } }]} />
 
 ## 08 AI 生成
 
