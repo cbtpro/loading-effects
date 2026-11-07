@@ -1,8 +1,10 @@
 function addLink(list, id, title) {
   const item = document.createElement('li');
   const link = document.createElement('a');
+  const label = document.createElement('span');
   link.href = `#${id}`;
-  link.textContent = title;
+  label.textContent = title;
+  link.append(label);
   item.append(link);
   list.append(item);
   return link;
@@ -21,6 +23,7 @@ function revealLink(scroller, link, axis) {
 export function mountGroupNav(nav, sections) {
   const list = nav.querySelector('.nav-list');
   const indicator = nav.querySelector('.nav-indicator');
+  const track = indicator.parentElement;
   const mobileEffects = nav.querySelector('.nav-mobile-effects');
   const mobile = matchMedia('(max-width: 800px)');
   const groups = sections.map(({ section, title, cards }) => {
@@ -95,8 +98,11 @@ export function mountGroupNav(nav, sections) {
     }
 
     if (!narrow) {
-      indicator.style.setProperty('--indicator-top', `${entry.link.offsetTop}px`);
-      indicator.style.height = `${entry.link.offsetHeight}px`;
+      const label = entry.link.firstElementChild.getBoundingClientRect();
+      const rail = track.getBoundingClientRect();
+      indicator.style.setProperty('--indicator-left', `${label.left - rail.left - 6}px`);
+      indicator.style.setProperty('--indicator-top', `${label.top - rail.top}px`);
+      indicator.style.height = `${label.height}px`;
       if (entryChanged || groupChanged) revealLink(nav, entry.link, 'y');
     } else if (entry.group && (entryChanged || groupChanged)) {
       revealLink(group.children, entry.link, 'x');

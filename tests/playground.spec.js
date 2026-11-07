@@ -5,6 +5,17 @@ test('right sidebar shows both levels and moves one indicator to the current lin
   const nav = page.getByRole('navigation', { name: '动效分类' });
   const current = nav.locator('[aria-current="location"]');
   const indicator = nav.locator('svg.nav-indicator');
+  const expectIndicatorByLabel = async () => {
+    await expect.poll(async () => {
+      const label = await current.locator('span').boundingBox();
+      const mark = await indicator.boundingBox();
+      return [
+        Math.round(label.x - mark.x - mark.width),
+        Math.round(mark.y - label.y),
+        Math.round(mark.height - label.height),
+      ];
+    }).toEqual([4, 0, 0]);
+  };
   await expect(nav.getByRole('link')).toHaveCount(45);
   await expect(indicator).toBeVisible();
   await expect(indicator.locator('rect')).toHaveAttribute('fill', 'currentColor');
@@ -15,15 +26,12 @@ test('right sidebar shows both levels and moves one indicator to the current lin
   await nav.getByRole('link', { name: '粒子系统', exact: true }).click();
   await expect(page).toHaveURL(/#particle-effects$/);
   await expect(current).toHaveText('粒子系统');
+  await expectIndicatorByLabel();
 
   await nav.getByRole('link', { name: '粒子网络', exact: true }).click();
   await expect(page).toHaveURL(/#particle-network$/);
   await expect(current).toHaveText('粒子网络');
-  await expect.poll(async () => {
-    const link = await current.boundingBox();
-    const mark = await indicator.boundingBox();
-    return [Math.round(mark.y - link.y), Math.round(mark.height - link.height)];
-  }).toEqual([0, 0]);
+  await expectIndicatorByLabel();
 
   await page.locator('#particle-flow').evaluate(card => {
     window.scrollBy(0, card.getBoundingClientRect().top - window.innerHeight / 2 + 4);

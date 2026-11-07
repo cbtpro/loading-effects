@@ -79,11 +79,11 @@ h3 { margin: 0; font-size: 1.0625rem; }
 .nav-indicator {
   position: absolute;
   top: 0;
-  left: 2px;
+  left: 0;
   width: 2px;
   height: 0;
   color: #2359be;
-  transform: translateY(var(--indicator-top, 0px));
+  transform: translate(var(--indicator-left, 0px), var(--indicator-top, 0px));
   transition: transform 200ms ease-out, height 200ms ease-out;
   pointer-events: none;
 }
