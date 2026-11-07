@@ -72,6 +72,9 @@ importers:
       '@loading-effects/vue':
         specifier: workspace:*
         version: link:../../packages/vue
+      '@loading-effects/web-components':
+        specifier: workspace:*
+        version: link:../../packages/web-components
       react:
         specifier: ^19.0.0
         version: 19.3.1
@@ -126,7 +129,11 @@ importers:
         specifier: ^3.3.0
         version: 3.5.45
 
-  packages/web-components: {}
+  packages/web-components:
+    dependencies:
+      '@loading-effects/core':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 

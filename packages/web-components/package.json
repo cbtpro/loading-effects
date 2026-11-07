@@ -1,7 +1,11 @@
 {
   "name": "@loading-effects/web-components",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Web Components 适配"
+  "description": "Web Components 适配",
+  "exports": "./src/index.js",
+  "dependencies": {
+    "@loading-effects/core": "workspace:*"
+  }
 }

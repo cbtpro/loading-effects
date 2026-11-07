@@ -1,6 +1,6 @@
 {
   "name": "@loading-effects/effects",
-  "version": "0.2.0-alpha.2",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "动效定义、参数 Schema 与预设",

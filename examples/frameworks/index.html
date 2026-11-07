@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Loading Effects · React 与 Vue 示例</title>
+    <title>Loading Effects · React、Vue 与 Web Components 示例</title>
     <style>
       body { font-family: system-ui, sans-serif; margin: 2rem; }
       main { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
@@ -13,10 +13,17 @@
     </style>
   </head>
   <body>
-    <h1>React 与 Vue 接入示例</h1>
+    <h1>React、Vue 与 Web Components 接入示例</h1>
     <main>
       <section id="react"><h2>React</h2><div id="react-app"></div></section>
       <section id="vue"><h2>Vue</h2><div id="vue-app"></div></section>
+      <section id="web-components">
+        <h2>Web Components</h2>
+        <button type="button" id="element-toggle">卸载</button>
+        <button type="button" id="element-effect">切换动效</button>
+        <label>速度 <input id="element-speed" type="range" min="0.2" max="3" step="0.1" value="1"></label>
+        <div id="element-app"></div>
+      </section>
     </main>
     <script type="module" src="./main.js"></script>
   </body>

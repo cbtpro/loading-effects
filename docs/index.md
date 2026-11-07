@@ -4,7 +4,7 @@ title: Loading Effects
 sidebar_label: 开始
 ---
 
-Loading Effects 是面向 Web 的可配置加载动效库。目前的 Playground 提供 29 种预设，分为基础几何、点阵与波纹、进度反馈、粒子系统和骨架占位。每种动效可独立调参，并提供 Vue、React 的 JS 和 TS 接入示例。
+Loading Effects 是面向 Web 的可配置加载动效库。目前的 Playground 提供 29 种预设，分为基础几何、点阵与波纹、进度反馈、粒子系统和骨架占位。每种动效可独立调参，并提供 Vue、React、Web Components 的 JS 和 TS 接入示例。
 
 - [动效目录](effect-catalog.md)包含 50 项规划及已实现动效的实拍。
 - [点阵与波纹](dot-matrix-ripple.md)包含 6 种预设的参数、波形和浏览器截图。

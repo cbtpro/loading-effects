@@ -5,6 +5,24 @@ export function buildExample(effect, framework, language, options) {
   const preset = effect.id.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
   const canvas = effect.renderer === 'canvas';
   const renderer = canvas ? 'createCanvasRenderer' : 'createCssRenderer';
+  if (framework === 'web-components') {
+    const size = canvas ? 'width: 100%; height: 240px;' : 'width: min(100%, 360px); height: 100px;';
+    return `import { defineLoadingEffect } from '@loading-effects/web-components';
+${typescript ? "import type { LoadingOptions } from '@loading-effects/core';\n" : ''}import { ${preset} } from '@loading-effects/effects';
+import { ${renderer} } from '@loading-effects/renderer-${effect.renderer}';
+
+defineLoadingEffect();
+const element = document.createElement('loading-effect');
+element.effect = '${effect.id}';
+element.registry = {
+  effects: { [${preset}.id]: ${preset} },
+  renderers: { ${effect.renderer}: ${renderer} },
+};
+const options${typescript ? ': LoadingOptions' : ''} = ${JSON.stringify(options, null, 2)};
+element.options = options;
+element.style.cssText = '${size}';
+document.body.append(element);${interactive ? "\nconst trigger = document.createElement('button');\ntrigger.type = 'button';\ntrigger.textContent = '从中心触发涟漪';\ntrigger.addEventListener('click', () => element.trigger([0.5, 0.5]));\ndocument.body.append(trigger);" : ''}`;
+  }
   const adapter = `@loading-effects/${framework}`;
   const imports = [
     interactive && (vue ? "import { ref } from 'vue';" : "import { useRef } from 'react';"),

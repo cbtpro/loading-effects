@@ -70,7 +70,8 @@ function mountCard(card, effect) {
   function renderCode() {
     if (!codeExample.open) return;
     code.textContent = buildExample(effect, framework, language, codeOptions);
-    get('code-filename').textContent = framework === 'vue' ? 'LoadingExample.vue' : `LoadingExample.${language}x`;
+    const extension = { vue: 'vue', react: `${language}x`, 'web-components': language };
+    get('code-filename').textContent = `LoadingExample.${extension[framework]}`;
     copyStatus.textContent = '';
   }
 

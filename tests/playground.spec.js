@@ -275,3 +275,16 @@ test('progressive reveal replaces individual text regions without resizing', asy
   await reveal.locator('.preview').scrollIntoViewIfNeeded();
   await expect(title).toHaveAttribute('data-ready', 'false');
 });
+
+test('Web Components snippets use the custom element API in JS and TS', async ({ page }) => {
+  await page.goto('/');
+  const example = page.locator('#interactive-ripple .code-example');
+  await example.getByText('查看代码', { exact: true }).click();
+  await example.getByRole('button', { name: 'Web Components', exact: true }).click();
+  await expect(example.locator('code')).toContainText("document.createElement('loading-effect')");
+  await expect(example.locator('code')).toContainText('element.trigger([0.5, 0.5])');
+  await expect(example.locator('.code-filename')).toHaveText('LoadingExample.js');
+  await example.getByRole('button', { name: 'TS', exact: true }).click();
+  await expect(example.locator('code')).toContainText('const options: LoadingOptions');
+  await expect(example.locator('.code-filename')).toHaveText('LoadingExample.ts');
+});

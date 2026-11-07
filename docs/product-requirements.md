@@ -24,7 +24,7 @@
 
 ## 里程碑
 
-当前工作区已实现 v0.1 的 14 个预设、CSS 与 Canvas 2D 渲染，以及 Vanilla JS、React 和 Vue 接入。`v0.2.0-alpha.2` 已接入 5 种进度反馈、6 种粒子和 4 种骨架占位，累计 29 项。Web Components 适配仍待交付。运行入口和截图见[快速开始](index.md)。
+当前工作区已实现 v0.1 的 14 个预设、CSS 与 Canvas 2D 渲染，以及 Vanilla JS、React 和 Vue 接入。`v0.2.0` 已接入 5 种进度反馈、6 种粒子和 4 种骨架占位，累计 29 项，并提供 Web Components 适配。运行入口和截图见[快速开始](index.md)。
 
 | 版本 | 动效范围 | 可交付结果 |
 | --- | --- | --- |

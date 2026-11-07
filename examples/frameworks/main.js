@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { createApp, h, ref } from 'vue';
 import { LoadingEffect as ReactLoading } from '@loading-effects/react';
 import { LoadingEffect as VueLoading } from '@loading-effects/vue';
+import { defineLoadingEffect } from '@loading-effects/web-components';
 import { circularSpinner, dotMatrixWave } from '@loading-effects/effects';
 import { createCssRenderer } from '@loading-effects/renderer-css';
 import { createCanvasRenderer } from '@loading-effects/renderer-canvas';
@@ -44,3 +45,28 @@ createApp({
     ]);
   },
 }).mount('#vue-app');
+
+defineLoadingEffect();
+const element = document.createElement('loading-effect');
+const elementHost = document.querySelector('#element-app');
+const elementToggle = document.querySelector('#element-toggle');
+element.effect = circularSpinner.id;
+element.registry = registry;
+element.style.height = '160px';
+elementHost.append(element);
+
+elementToggle.addEventListener('click', () => {
+  if (element.isConnected) {
+    element.remove();
+    elementToggle.textContent = '挂载';
+  } else {
+    elementHost.append(element);
+    elementToggle.textContent = '卸载';
+  }
+});
+document.querySelector('#element-effect').addEventListener('click', () => {
+  element.effect = nextEffect(element.effect);
+});
+document.querySelector('#element-speed').addEventListener('input', event => {
+  element.setAttribute('speed', event.target.value);
+});

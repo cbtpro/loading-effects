@@ -14,6 +14,7 @@
     "@loading-effects/renderer-canvas": "workspace:*",
     "@loading-effects/renderer-css": "workspace:*",
     "@loading-effects/vue": "workspace:*",
+    "@loading-effects/web-components": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vue": "^3.3.0"

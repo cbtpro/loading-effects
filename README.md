@@ -11,7 +11,7 @@ pnpm install --frozen-lockfile
 pnpm -r list --depth -1
 ```
 
-Playground 已接入 29 种预设。`v0.2.0-alpha.2` 补齐 6 种粒子系统和 4 种骨架占位，与已有 5 种进度反馈一起覆盖 v0.2 的动效范围。
+Playground 已接入 29 种预设。`v0.2.0` 包含 6 种粒子系统和 4 种骨架占位，与已有 5 种进度反馈一起覆盖 v0.2 的动效范围。
 
 ```sh
 pnpm --filter @loading-effects/app-playground dev --port 4173
@@ -24,17 +24,18 @@ pnpm --filter @loading-effects/app-playground build
 
 ## 框架示例
 
-Playground 每张动效卡片的「查看代码」默认折叠。展开后可切换 Vue、React 和 JS、TS，复制带有当前动效参数的组件示例。
+Playground 每张动效卡片的「查看代码」默认折叠。展开后可切换 Vue、React、Web Components 和 JS、TS，复制带有当前动效参数的组件示例。
 
 ```sh
 pnpm --filter @loading-effects/example-frameworks dev --port 4174
 ```
 
-打开 [React 与 Vue 示例](http://127.0.0.1:4174/)，可以切换动效、更新参数及反复挂载和卸载。包通过本地工作区引用。
+打开 [React、Vue 与 Web Components 示例](http://127.0.0.1:4174/)，可以切换动效、更新参数及反复挂载和卸载。包通过本地工作区引用。
 
 - [Vanilla JS 用法](packages/core/README.md)
 - [React 用法](packages/react/README.md)
 - [Vue 用法](packages/vue/README.md)
+- [Web Components 用法](packages/web-components/README.md)
 
 ## 文档
 
