@@ -3,6 +3,7 @@ import { createLoading, progressAttributes } from '@loading-effects/core';
 const registered = new WeakSet();
 const attributes = {
   color: ['color', String],
+  cursor: ['cursor', String],
   background: ['background', String],
   duration: ['duration', Number],
   speed: ['speed', Number],

@@ -54,6 +54,7 @@ h3 { margin: 0; font-size: 1.125rem; }
 .surface, .result { position: absolute; inset: 0; }
 .result { display: grid; place-items: center; background: #eaf2ff; }
 .progress {
+  pointer-events: none;
   position: absolute;
   right: 16px;
   bottom: 16px;

@@ -26,6 +26,7 @@
 | `loop`、`paused` | 布尔，true、false | 单次播放到终帧后停止。暂停冻结当前相位，独立于进度更新 |
 | `progress`、`progressSource` | 0–100 或 null，默认 null。来源为 `actual` 或 `estimated`，默认 actual | 进度由宿主更新，非有限值回到 null。实际百分比和估算必须明确区分 |
 | `density`、`amplitude` | 可选数字 | 仅在支持的预设生效，由该预设声明单位和范围 |
+| `cursor` | 默认 `progress`，交互涟漪默认 `pointer` | 仅作用于动效宿主。设为 `auto` 或销毁时恢复原样式 |
 | `opacity` | 0–1，1 | 统一乘在视觉层，语义层独立 |
 | 实例的 `renderer` | `css`、`canvas`、`webgl` 或 `static` | 预设指定后端，实例报告实际结果。Canvas 2D 或 WebGL 2 不可用时返回 `static` |
 | `reducedMotion` | `system` 或 `static`，默认 system | system 跟随系统偏好，static 始终使用静态姿态 |

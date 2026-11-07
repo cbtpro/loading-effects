@@ -6,6 +6,7 @@ export const commonSchema = {
   opacity: { default: 1, min: 0, max: 1, step: .05 },
   loop: { default: true, type: 'boolean' },
   paused: { default: false, type: 'boolean' },
+  cursor: { default: 'progress', choices: ['progress', 'wait', 'pointer', 'crosshair', 'default', 'auto'] },
   reducedMotion: { default: 'system', choices: ['system', 'static'] },
 };
 
@@ -100,6 +101,28 @@ export function createLoading(element, { effect: id, ...input }, registry) {
   let previous = null;
   let elapsed = 0;
 
+  let appliedCursor;
+  let previousCursor;
+  let previousCursorPriority;
+
+  function setCursor(cursor) {
+    const style = element.style;
+    const current = style.getPropertyValue('cursor');
+    const priority = style.getPropertyPriority('cursor');
+    if (current !== appliedCursor || priority) appliedCursor = undefined;
+    if (cursor === 'auto') {
+      if (appliedCursor) style.setProperty('cursor', previousCursor, previousCursorPriority);
+      appliedCursor = undefined;
+      return;
+    }
+    if (!appliedCursor) {
+      previousCursor = current;
+      previousCursorPriority = priority;
+    }
+    style.setProperty('cursor', cursor);
+    appliedCursor = cursor;
+  }
+
   const isStatic = () => options.reducedMotion === 'static' || media.matches;
   const visible = () => size.width > 0 && size.height > 0 && inView && !document.hidden;
   const running = () => visible() && !options.paused && !isStatic() && renderer.animated &&
@@ -169,7 +192,9 @@ export function createLoading(element, { effect: id, ...input }, registry) {
   function replaceOptions(next) {
     if (destroyed) return;
     input = { ...next };
+    const oldCursor = options.cursor;
     options = resolve();
+    if (oldCursor !== options.cursor) setCursor(options.cursor);
     renderer.update(options);
     refresh();
   }
@@ -180,6 +205,7 @@ export function createLoading(element, { effect: id, ...input }, registry) {
 
   renderer.setRefresh?.(refresh);
   renderer.update(options);
+  setCursor(options.cursor);
   resizeObserver.observe(element);
   intersectionObserver.observe(element);
   document.addEventListener('visibilitychange', refresh);
@@ -209,6 +235,7 @@ export function createLoading(element, { effect: id, ...input }, registry) {
       media.removeEventListener('change', refresh);
       dprQuery.removeEventListener('change', watchDpr);
       renderer.destroy();
+      setCursor('auto');
     },
   };
 }

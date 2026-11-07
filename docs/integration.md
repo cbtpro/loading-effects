@@ -117,6 +117,12 @@ document.body.append(element);
 
 `registry` 和复杂参数通过 JS property 传入。标量 HTML 属性可覆盖 `options`，例如设置 `progress="80"` 后显示 80，移除该属性则恢复到 `options.progress`。从 DOM 移除元素会销毁实例，再插入时读取当前配置。显式注册在浏览器执行，模块可在服务端导入。
 
+## 鼠标指针
+
+普通预设默认在动效容器内使用系统进度指针，交互涟漪默认使用手型。通过 `options.cursor` 修改样式，可选 `progress`、`wait`、`pointer`、`crosshair`、`default` 和 `auto`。设为 `auto` 时恢复容器原来的样式。Web Components 也可使用 `cursor` HTML 属性。
+
+Playground 每张卡片的「鼠标指针」参数独立生效。「跟随页面（关闭）」对应 `auto`，自定义值会随当前配置进入复制的代码。
+
 ## 更新与销毁
 
 | 操作 | 行为 |

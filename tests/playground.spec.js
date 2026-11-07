@@ -479,3 +479,30 @@ test('liquid fill opens with visible progress even without Canvas 2D', async ({ 
   await card.getByRole('button', { name: '恢复默认' }).click();
   await expect.poll(() => fill.evaluate(node => node.style.height)).toBe('63%');
 });
+
+test('all presets have a default cursor and can override or disable it', async ({ page }) => {
+  await page.goto('/');
+  const cards = page.locator('.effect-card');
+  await expect(cards).toHaveCount(38);
+  const cursors = await cards.evaluateAll(nodes => nodes.map(card => [
+    card.id, getComputedStyle(card.querySelector('.surface')).cursor,
+  ]));
+  for (const [id, cursor] of cursors) {
+    expect(cursor, id).toBe(id === 'interactive-ripple' ? 'pointer' : 'progress');
+  }
+
+  const card = page.locator('#circular-spinner');
+  const surface = card.locator('.surface');
+  await card.getByText('参数与演示进度', { exact: true }).click();
+  const picker = card.getByLabel('鼠标指针', { exact: true });
+  await picker.selectOption('crosshair');
+  await expect(surface).toHaveCSS('cursor', 'crosshair');
+  await card.getByText('查看代码', { exact: true }).click();
+  await expect(card.locator('code')).toContainText('"cursor": "crosshair"');
+  await picker.selectOption('auto');
+  await expect(surface).toHaveCSS('cursor', 'auto');
+  await card.getByRole('button', { name: '恢复默认' }).click();
+  await expect(surface).toHaveCSS('cursor', 'progress');
+  await card.getByRole('button', { name: '模拟内容就绪' }).click();
+  await expect(surface).toHaveCSS('cursor', 'auto');
+});

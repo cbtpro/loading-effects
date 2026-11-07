@@ -7,6 +7,7 @@ export interface LoadingOptions {
   opacity?: number;
   loop?: boolean;
   paused?: boolean;
+  cursor?: 'progress' | 'wait' | 'pointer' | 'crosshair' | 'default' | 'auto';
   progress?: number | null;
   progressSource?: 'actual' | 'estimated';
   steps?: readonly string[];
