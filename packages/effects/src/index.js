@@ -1,5 +1,3 @@
-import { commonSchema } from '@loading-effects/core';
-
 const tau = 2 * Math.PI;
 
 const matrixSchema = {
@@ -165,7 +163,6 @@ export const interactiveRipple = {
   layoutFields: gridFields,
   schema: {
     ...matrixSchema,
-    cursor: { ...commonSchema.cursor, default: 'pointer' },
     waveSpeed: { default: 100, min: 25, max: 400, step: 5, label: '扩散速度（px/s）' },
     pulseWidth: { default: 24, min: 12, max: 100, step: 1, label: '脉冲宽度（px）' },
     lifetime: { default: 1500, min: 300, max: 4000, step: 100, label: '寿命（ms）' },

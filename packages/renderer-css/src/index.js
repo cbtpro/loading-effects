@@ -13,6 +13,7 @@ export function createCssRenderer(element, effect) {
 
   return {
     name: 'css',
+    supportsPointer: true,
     get animated() { return effect.animated?.(options) ?? true; },
     resize() {},
     update(next) {
@@ -27,11 +28,15 @@ export function createCssRenderer(element, effect) {
         draw = effect.mount(surface, options);
       }
     },
-    render(elapsed, _options, still) {
+    render(elapsed, _options, still, [x, y] = [0, 0]) {
       const progress = options.loop
         ? (elapsed % options.duration) / options.duration
         : Math.min(1, elapsed / options.duration);
       draw(progress, options, still);
+      const translate = x || y ? `${x}px ${y}px` : '';
+      for (const child of surface.children) {
+        if (child.style.translate !== translate) child.style.translate = translate;
+      }
     },
     destroy: () => surface.remove(),
   };

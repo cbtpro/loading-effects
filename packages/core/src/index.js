@@ -6,7 +6,7 @@ export const commonSchema = {
   opacity: { default: 1, min: 0, max: 1, step: .05 },
   loop: { default: true, type: 'boolean' },
   paused: { default: false, type: 'boolean' },
-  cursor: { default: 'progress', choices: ['progress', 'wait', 'pointer', 'crosshair', 'default', 'auto'] },
+  pointerReactive: { default: true, type: 'boolean' },
   reducedMotion: { default: 'system', choices: ['system', 'static'] },
 };
 
@@ -100,33 +100,39 @@ export function createLoading(element, { effect: id, ...input }, registry) {
   let frame = null;
   let previous = null;
   let elapsed = 0;
-
-  let appliedCursor;
-  let previousCursor;
-  let previousCursorPriority;
-
-  function setCursor(cursor) {
-    const style = element.style;
-    const current = style.getPropertyValue('cursor');
-    const priority = style.getPropertyPriority('cursor');
-    if (current !== appliedCursor || priority) appliedCursor = undefined;
-    if (cursor === 'auto') {
-      if (appliedCursor) style.setProperty('cursor', previousCursor, previousCursorPriority);
-      appliedCursor = undefined;
-      return;
-    }
-    if (!appliedCursor) {
-      previousCursor = current;
-      previousCursorPriority = priority;
-    }
-    style.setProperty('cursor', cursor);
-    appliedCursor = cursor;
-  }
+  const target = [0, 0];
+  const offset = [0, 0];
 
   const isStatic = () => options.reducedMotion === 'static' || media.matches;
   const visible = () => size.width > 0 && size.height > 0 && inView && !document.hidden;
-  const running = () => visible() && !options.paused && !isStatic() && renderer.animated &&
+  const allowsMotion = () => !options.paused && !isStatic();
+  const animationRunning = () => allowsMotion() && renderer.animated &&
     (renderer.isActive?.() ?? (options.loop || elapsed < options.duration));
+  const pointerEnabled = () => allowsMotion() && options.pointerReactive && renderer.supportsPointer;
+  const running = () => visible() && (animationRunning() ||
+    (pointerEnabled() && (offset[0] !== target[0] || offset[1] !== target[1])));
+
+  function movePointer(event) {
+    if (event.pointerType !== 'mouse' || !pointerEnabled()) return;
+    const bounds = element.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+    const reach = Math.min(10, Math.min(bounds.width, bounds.height) * .06);
+    target[0] = clamp((event.clientX - bounds.left) / bounds.width * 2 - 1, -1, 1) * reach;
+    target[1] = clamp((event.clientY - bounds.top) / bounds.height * 2 - 1, -1, 1) * reach;
+    schedule();
+  }
+
+  function leavePointer() {
+    target.fill(0);
+    schedule();
+  }
+
+  function advancePointer() {
+    for (let index = 0; index < 2; index++) {
+      const distance = target[index] - offset[index];
+      offset[index] = Math.abs(distance) < .08 ? target[index] : offset[index] + distance * .24;
+    }
+  }
 
   function draw() {
     if (visible()) {
@@ -135,7 +141,7 @@ export function createLoading(element, { effect: id, ...input }, registry) {
         layoutPending = false;
       }
       const still = isStatic();
-      renderer.render(still ? 0 : elapsed, options, still);
+      renderer.render(still ? 0 : elapsed, options, still, offset);
     }
   }
 
@@ -145,9 +151,14 @@ export function createLoading(element, { effect: id, ...input }, registry) {
       previous = null;
       return;
     }
-    if (previous !== null) elapsed += (timestamp - previous) * options.speed;
-    if (!options.loop && !renderer.isActive) elapsed = Math.min(elapsed, options.duration);
-    previous = timestamp;
+    if (animationRunning()) {
+      if (previous !== null) elapsed += (timestamp - previous) * options.speed;
+      if (!options.loop && !renderer.isActive) elapsed = Math.min(elapsed, options.duration);
+      previous = timestamp;
+    } else {
+      previous = null;
+    }
+    if (pointerEnabled()) advancePointer();
     draw();
     schedule();
   }
@@ -163,6 +174,10 @@ export function createLoading(element, { effect: id, ...input }, registry) {
   }
 
   function refresh() {
+    if (!visible() || !pointerEnabled()) {
+      target.fill(0);
+      offset.fill(0);
+    }
     draw();
     schedule();
   }
@@ -192,9 +207,7 @@ export function createLoading(element, { effect: id, ...input }, registry) {
   function replaceOptions(next) {
     if (destroyed) return;
     input = { ...next };
-    const oldCursor = options.cursor;
     options = resolve();
-    if (oldCursor !== options.cursor) setCursor(options.cursor);
     renderer.update(options);
     refresh();
   }
@@ -205,11 +218,13 @@ export function createLoading(element, { effect: id, ...input }, registry) {
 
   renderer.setRefresh?.(refresh);
   renderer.update(options);
-  setCursor(options.cursor);
   resizeObserver.observe(element);
   intersectionObserver.observe(element);
   document.addEventListener('visibilitychange', refresh);
   media.addEventListener('change', refresh);
+  element.addEventListener('pointerenter', movePointer);
+  element.addEventListener('pointermove', movePointer);
+  element.addEventListener('pointerleave', leavePointer);
   watchDpr();
   resize();
 
@@ -222,7 +237,11 @@ export function createLoading(element, { effect: id, ...input }, registry) {
     trigger(origin) {
       if (destroyed || !renderer.trigger || !visible() || options.paused || isStatic() ||
         !Array.isArray(origin) || origin.length !== 2 || !origin.every(Number.isFinite)) return;
-      renderer.trigger(origin.map(value => clamp(value, 0, 1)), elapsed, options);
+      const position = [
+        clamp(origin[0] - offset[0] / size.width, 0, 1),
+        clamp(origin[1] - offset[1] / size.height, 0, 1),
+      ];
+      renderer.trigger(position, elapsed, options);
       refresh();
     },
     destroy() {
@@ -233,9 +252,11 @@ export function createLoading(element, { effect: id, ...input }, registry) {
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', refresh);
       media.removeEventListener('change', refresh);
+      element.removeEventListener('pointerenter', movePointer);
+      element.removeEventListener('pointermove', movePointer);
+      element.removeEventListener('pointerleave', leavePointer);
       dprQuery.removeEventListener('change', watchDpr);
       renderer.destroy();
-      setCursor('auto');
     },
   };
 }

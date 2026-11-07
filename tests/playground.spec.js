@@ -414,6 +414,12 @@ test('WebGL fluid shaders draw pixels and recover from context loss', async ({ p
 
   const card = page.locator('#ink-diffusion');
   const canvas = card.locator('canvas');
+  await card.locator('.surface').hover({ position: { x: 12, y: 12 } });
+  await expect.poll(() => canvas.evaluate(node => {
+    const gl = node.getContext('webgl2');
+    const program = gl.getParameter(gl.CURRENT_PROGRAM);
+    return gl.getUniform(program, gl.getUniformLocation(program, 'uPointerOffset'))[0];
+  })).toBeLessThan(-1);
   await canvas.evaluate(node => {
     const extension = node.getContext('webgl2').getExtension('WEBGL_lose_context');
     node.addEventListener('webglcontextlost', () => setTimeout(() => extension.restoreContext(), 800), { once: true });
@@ -480,29 +486,45 @@ test('liquid fill opens with visible progress even without Canvas 2D', async ({ 
   await expect.poll(() => fill.evaluate(node => node.style.height)).toBe('63%');
 });
 
-test('all presets have a default cursor and can override or disable it', async ({ page }) => {
+test('pointer movement shifts the effect and leaving restores the original position', async ({ page }) => {
+  await page.addInitScript(() => {
+    const prototype = CanvasRenderingContext2D.prototype;
+    const clear = prototype.clearRect;
+    const translate = prototype.translate;
+    prototype.clearRect = function (...args) {
+      if (this.canvas.closest('#interactive-ripple')) window.rippleOffset = [0, 0];
+      return clear.apply(this, args);
+    };
+    prototype.translate = function (x, y) {
+      if (this.canvas.closest('#interactive-ripple')) window.rippleOffset = [x, y];
+      return translate.call(this, x, y);
+    };
+  });
   await page.goto('/');
-  const cards = page.locator('.effect-card');
-  await expect(cards).toHaveCount(38);
-  const cursors = await cards.evaluateAll(nodes => nodes.map(card => [
-    card.id, getComputedStyle(card.querySelector('.surface')).cursor,
-  ]));
-  for (const [id, cursor] of cursors) {
-    expect(cursor, id).toBe(id === 'interactive-ripple' ? 'pointer' : 'progress');
-  }
+  const stage = page.locator('#step-progress');
+  const surface = stage.locator('.surface');
+  const stageContent = surface.locator('ol');
+  await surface.scrollIntoViewIfNeeded();
+  await surface.hover({ position: { x: 12, y: 12 } });
+  await expect.poll(() => stageContent.evaluate(node => node.style.translate)).toMatch(/-/);
+  await stage.getByText('参数与演示进度', { exact: true }).hover();
+  await expect.poll(() => stageContent.evaluate(node => node.style.translate)).toBe('');
 
-  const card = page.locator('#circular-spinner');
-  const surface = card.locator('.surface');
-  await card.getByText('参数与演示进度', { exact: true }).click();
-  const picker = card.getByLabel('鼠标指针', { exact: true });
-  await picker.selectOption('crosshair');
-  await expect(surface).toHaveCSS('cursor', 'crosshair');
-  await card.getByText('查看代码', { exact: true }).click();
-  await expect(card.locator('code')).toContainText('"cursor": "crosshair"');
-  await picker.selectOption('auto');
-  await expect(surface).toHaveCSS('cursor', 'auto');
-  await card.getByRole('button', { name: '恢复默认' }).click();
-  await expect(surface).toHaveCSS('cursor', 'progress');
-  await card.getByRole('button', { name: '模拟内容就绪' }).click();
-  await expect(surface).toHaveCSS('cursor', 'auto');
+  await stage.getByText('参数与演示进度', { exact: true }).click();
+  const toggle = stage.getByRole('checkbox', { name: '响应鼠标' });
+  await expect(toggle).toBeChecked();
+  await toggle.uncheck();
+  await surface.hover({ position: { x: 12, y: 12 } });
+  await page.waitForTimeout(150);
+  expect(await stageContent.evaluate(node => node.style.translate)).toBe('');
+
+  const ripple = page.locator('#interactive-ripple');
+  const canvas = ripple.locator('canvas');
+  await ripple.locator('.surface').scrollIntoViewIfNeeded();
+  await expect.poll(() => canvas.evaluate(node => node.width)).toBeGreaterThan(0);
+  const offset = () => page.evaluate(() => window.rippleOffset);
+  await ripple.locator('.surface').hover({ position: { x: 16, y: 16 } });
+  await expect.poll(async () => (await offset())?.[0]).toBeLessThan(-1);
+  await ripple.getByRole('button', { name: '从中心触发涟漪' }).hover();
+  await expect.poll(offset).toEqual([0, 0]);
 });

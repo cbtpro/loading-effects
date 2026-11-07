@@ -7,7 +7,7 @@ export interface LoadingOptions {
   opacity?: number;
   loop?: boolean;
   paused?: boolean;
-  cursor?: 'progress' | 'wait' | 'pointer' | 'crosshair' | 'default' | 'auto';
+  pointerReactive?: boolean;
   progress?: number | null;
   progressSource?: 'actual' | 'estimated';
   steps?: readonly string[];
@@ -28,9 +28,10 @@ export interface EffectDefinition {
 export interface LoadingRenderer {
   name: string;
   animated: boolean;
+  supportsPointer?: boolean;
   resize(size: { width: number; height: number }, dpr: number, options: LoadingOptions): void;
   update(options: LoadingOptions): void;
-  render(elapsed: number, options: LoadingOptions, still: boolean): void;
+  render(elapsed: number, options: LoadingOptions, still: boolean, pointer?: readonly [number, number]): void;
   isActive?(): boolean;
   setRefresh?(refresh: () => void): void;
   trigger?(origin: [number, number], elapsed: number, options: LoadingOptions): void;

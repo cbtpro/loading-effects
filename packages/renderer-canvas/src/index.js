@@ -53,6 +53,7 @@ export function createCanvasRenderer(element, effect) {
 
   return {
     name: 'canvas',
+    supportsPointer: true,
     animated: true,
     isActive: effect.isActive && (() => effect.isActive(state)),
     trigger: effect.trigger && ((origin, elapsed, options) => effect.trigger(state, origin, elapsed, options)),
@@ -71,10 +72,18 @@ export function createCanvasRenderer(element, effect) {
       if (ratio) context.setTransform(canvas.width / width, 0, 0, canvas.height / height, 0, 0);
       prepare(options);
     },
-    render(elapsed, options, still) {
+    render(elapsed, options, still, [x, y] = [0, 0]) {
       if (!canvas.width || !canvas.height) return;
       context.clearRect(0, 0, size.width, size.height);
-      effect.draw(context, layout, elapsed, options, still ? staticState : state, size, still);
+      if (x || y) {
+        context.save();
+        context.translate(x, y);
+      }
+      try {
+        effect.draw(context, layout, elapsed, options, still ? staticState : state, size, still);
+      } finally {
+        if (x || y) context.restore();
+      }
     },
     destroy: () => canvas.remove(),
   };

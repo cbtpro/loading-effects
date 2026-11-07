@@ -30,9 +30,6 @@ const registry = {
   renderers: { canvas: createCanvasRenderer, css: createCssRenderer, webgl: createWebGLRenderer },
 };
 const template = document.querySelector('#effect-card');
-const cursorLabels = {
-  progress: '进度', wait: '等待', pointer: '手型', crosshair: '十字', default: '箭头', auto: '跟随页面（关闭）',
-};
 
 function mountCard(card, effect) {
   const get = name => card.querySelector(`[data-part="${name}"]`);
@@ -133,7 +130,7 @@ function mountCard(card, effect) {
     const controls = get('controls');
     const fields = {
       speed: { ...commonSchema.speed, label: '速度（倍）' },
-      cursor: { ...(effect.schema.cursor ?? commonSchema.cursor), label: '鼠标指针' },
+      pointerReactive: { ...commonSchema.pointerReactive, label: '响应鼠标' },
       ...Object.fromEntries(Object.entries(effect.schema).filter(([, field]) => field.label)),
     };
     if (effect.stageProgress) {
@@ -157,9 +154,7 @@ function mountCard(card, effect) {
       const isSelect = field.choices && field.min === undefined;
       const input = document.createElement(isSelect ? 'select' : 'input');
       if (isSelect) {
-        for (const option of field.choices) {
-          input.add(new Option(name === 'cursor' ? cursorLabels[option] : option, option));
-        }
+        for (const option of field.choices) input.add(new Option(option, option));
       } else {
         input.type = { color: 'color', boolean: 'checkbox', text: 'text' }[field.type] ?? 'range';
       }

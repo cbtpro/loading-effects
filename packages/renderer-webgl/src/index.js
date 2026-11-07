@@ -71,17 +71,18 @@ export function createWebGLRenderer(element, effect) {
 precision highp float;
 uniform vec2 uSize;
 uniform vec2 uBufferSize;
+uniform vec2 uPointerOffset;
 uniform vec4 uColor;
 uniform float uPhase;
 out vec4 fragment;
 ${effect.fragment}
 void main() {
   vec2 uv = gl_FragCoord.xy / uBufferSize;
-  fragment = effectColor(vec2(uv.x, 1.0 - uv.y) * uSize);
+  fragment = effectColor(vec2(uv.x, 1.0 - uv.y) * uSize - uPointerOffset);
 }`);
     if (program) {
       locations = Object.fromEntries(
-        ['uSize', 'uBufferSize', 'uColor', 'uPhase', ...Object.keys(uniforms)]
+        ['uSize', 'uBufferSize', 'uPointerOffset', 'uColor', 'uPhase', ...Object.keys(uniforms)]
           .map(name => [name, gl.getUniformLocation(program, name)]),
       );
       gl.useProgram(program);
@@ -107,6 +108,7 @@ void main() {
   return {
     get name() { return program ? 'webgl' : 'static'; },
     get animated() { return Boolean(program); },
+    get supportsPointer() { return Boolean(program); },
     setRefresh(callback) { refresh = callback; },
     update(next) {
       if (colorContext && options?.color !== next.color) {
@@ -134,13 +136,14 @@ void main() {
       canvas.width = ratio ? Math.max(1, Math.floor(width * ratio)) : 0;
       canvas.height = ratio ? Math.max(1, Math.floor(height * ratio)) : 0;
     },
-    render(elapsed) {
+    render(elapsed, _options, _still, [x, y] = [0, 0]) {
       if (!program || !canvas.width || !canvas.height || gl.isContextLost()) return;
       const width = gl.drawingBufferWidth;
       const height = gl.drawingBufferHeight;
       gl.viewport(0, 0, width, height);
       gl.uniform2f(locations.uSize, size.width, size.height);
       gl.uniform2f(locations.uBufferSize, width, height);
+      gl.uniform2f(locations.uPointerOffset, x, y);
       gl.uniform4f(locations.uColor, rgba[0], rgba[1], rgba[2], rgba[3] * options.opacity);
       const phase = elapsed / options.duration;
       gl.uniform1f(locations.uPhase, options.loop ? phase % 1 : Math.min(1, phase));
