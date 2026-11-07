@@ -25,7 +25,10 @@ export function normalizeOptions(schema, input, supportsColor) {
     } else if (field.type === 'labels' && Array.isArray(value) && value.length >= field.min &&
       value.length <= field.max && value.every(label => typeof label === 'string' && label.trim() && label.length <= 32)) {
       result = value.map(label => label.trim());
-    } else if (field.itemChoices && Array.isArray(value) && value.length >= 2 &&
+    } else if (field.type === 'textMap' && value && typeof value === 'object' && !Array.isArray(value)) {
+      result = Object.fromEntries(field.itemChoices.filter(name => Object.hasOwn(value, name) &&
+        typeof value[name] === 'string').map(name => [name, value[name].slice(0, 300)]));
+    } else if (field.itemChoices && Array.isArray(value) && value.length >= (field.minItems ?? 2) &&
       value.length <= field.itemChoices.length && value.every(item => field.itemChoices.includes(item))) {
       result = value;
     } else if (field.choices?.includes(value)) {

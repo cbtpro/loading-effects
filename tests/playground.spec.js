@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('card configuration, completion and rendering stay independent', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.effect-card')).toHaveCount(19);
+  await expect(page.locator('.effect-card')).toHaveCount(29);
   await expect(page.locator('.code-example[open]')).toHaveCount(0);
 
   const wave = page.locator('#dot-matrix-wave');
@@ -133,17 +133,17 @@ test('reduced motion keeps the interactive preview static at a narrow viewport',
   await expect.poll(() => canvas.evaluate((node, stillFrame) => node.toDataURL() !== stillFrame, still)).toBe(true);
 });
 
-test('all 19 presets render when their previews enter the viewport', async ({ page }) => {
+test('all 29 presets render when their previews enter the viewport', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('.effect-card');
-  await expect(cards).toHaveCount(19);
+  await expect(cards).toHaveCount(29);
 
   for (const card of await cards.all()) {
     await card.locator('.preview').scrollIntoViewIfNeeded();
     const renderer = await card.getAttribute('data-renderer');
     if (renderer === 'canvas') {
       await expect.poll(() => card.locator('canvas').evaluate(canvas => canvas.width)).toBeGreaterThan(0);
-    } else if (await card.getAttribute('data-task-progress') !== null) {
+    } else if (await card.getAttribute('data-skeleton') !== null || await card.getAttribute('data-task-progress') !== null) {
       await expect.poll(() => card.locator('.surface > div > :first-child').evaluate(node => node.clientHeight)).toBeGreaterThan(0);
     } else {
       const shape = card.locator('.surface > div > div').first();
@@ -229,4 +229,49 @@ test('segmented, step and wave previews follow their task inputs', async ({ page
   await wave.locator('.preview').scrollIntoViewIfNeeded();
   await expect.poll(alpha).toBe(255);
   await expect(wave.locator('[data-part="ready"]')).toBeHidden();
+});
+
+test('particle motion responds to pause and resumes without remounting', async ({ page }) => {
+  await page.goto('/');
+  const orbit = page.locator('#particle-orbit');
+  const canvas = orbit.locator('canvas');
+  await canvas.scrollIntoViewIfNeeded();
+  const pixels = () => canvas.evaluate(node => node.toDataURL());
+  await expect.poll(() => canvas.evaluate(node => node.width)).toBeGreaterThan(0);
+  const first = await pixels();
+  await expect.poll(async () => await pixels() === first).toBe(false);
+  await orbit.getByRole('button', { name: '暂停', exact: true }).click();
+  const frozen = await pixels();
+  await page.waitForTimeout(100);
+  expect(await pixels() === frozen).toBe(true);
+  await orbit.getByRole('button', { name: '继续播放' }).click();
+  await expect.poll(async () => await pixels() === frozen).toBe(false);
+});
+
+test('progressive reveal replaces individual text regions without resizing', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const reveal = page.locator('#progressive-reveal');
+  await reveal.getByText('参数与演示进度', { exact: true }).click();
+  await reveal.getByLabel('布局', { exact: true }).selectOption('article-card');
+  await reveal.locator('.preview').scrollIntoViewIfNeeded();
+  const title = reveal.locator('[data-region="title"]');
+  const body = reveal.locator('[data-region="body"]');
+  const footer = reveal.locator('[data-region="footer"]');
+  const before = await title.boundingBox();
+  await reveal.getByRole('checkbox', { name: '标题', exact: true }).check();
+  await reveal.locator('.preview').scrollIntoViewIfNeeded();
+  await expect(title).toHaveAttribute('data-ready', 'true');
+  await expect(body).toHaveAttribute('data-ready', 'false');
+  await expect(footer).toHaveAttribute('data-ready', 'false');
+  await expect(title.getByText('加载动效示例')).toBeVisible();
+  const after = await title.boundingBox();
+  expect([after.width, after.height]).toEqual([before.width, before.height]);
+  await reveal.getByText('查看代码', { exact: true }).click();
+  await expect(reveal.locator('code')).toContainText('"readyKeys": [');
+  await expect(reveal.locator('code')).toContainText('各区域随任务结果独立显示');
+  await reveal.getByRole('button', { name: '恢复默认' }).click();
+  await expect(reveal.getByRole('checkbox', { name: '标题', exact: true })).not.toBeChecked();
+  await reveal.locator('.preview').scrollIntoViewIfNeeded();
+  await expect(title).toHaveAttribute('data-ready', 'false');
 });

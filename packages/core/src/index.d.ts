@@ -11,6 +11,8 @@ export interface LoadingOptions {
   progressSource?: 'actual' | 'estimated';
   steps?: readonly string[];
   activeStep?: number;
+  readyKeys?: readonly string[];
+  content?: Readonly<Record<string, string>>;
   reducedMotion?: 'system' | 'static';
 }
 
@@ -61,6 +63,7 @@ export interface LoadingField {
   step?: number;
   choices?: readonly unknown[];
   itemChoices?: readonly unknown[];
+  minItems?: number;
   integer?: boolean;
   label?: string;
   normalize?(value: number): number;

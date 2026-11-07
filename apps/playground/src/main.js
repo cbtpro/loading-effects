@@ -2,6 +2,8 @@ import { commonSchema, createLoading, normalizeProgress, progressAttributes } fr
 import {
   circularSpinner, bouncingDots, pulseCircle, rotatingSquares, orbitDots, elasticLine, morphingShape, flipTiles,
   circularProgress, gradientProgress, segmentedProgress, stepProgress, waveProgress,
+  particleFlow, particleConvergence, particleExplosion, particleOrbit, particleMorph, particleNetwork,
+  shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal,
   dotMatrixWave, radialRipple, directionalWave, matrixBreathing, matrixVortex, interactiveRipple,
 } from '@loading-effects/effects';
 import { createCssRenderer } from '@loading-effects/renderer-css';
@@ -12,6 +14,8 @@ import './style.css';
 const groups = [
   ['matrix-effects', '点阵与波纹', [dotMatrixWave, radialRipple, directionalWave, matrixBreathing, matrixVortex, interactiveRipple]],
   ['progress-effects', '进度反馈', [circularProgress, gradientProgress, segmentedProgress, stepProgress, waveProgress]],
+  ['particle-effects', '粒子系统', [particleFlow, particleConvergence, particleExplosion, particleOrbit, particleMorph, particleNetwork]],
+  ['skeleton-effects', '骨架占位', [shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal]],
   ['geometry-effects', '基础几何', [circularSpinner, bouncingDots, pulseCircle, rotatingSquares, orbitDots, elasticLine, morphingShape, flipTiles]],
 ];
 const effects = groups.flatMap(([, , presets]) => presets);
@@ -34,7 +38,10 @@ function mountCard(card, effect) {
   const trigger = get('trigger');
   const preview = surface.parentElement;
   if (effect === circularProgress) progress.classList.add('sr-only');
-  mode.closest('fieldset').hidden = Boolean(effect.stageProgress);
+  mode.closest('fieldset').hidden = Boolean(effect.stageProgress || effect.skeleton);
+  if (effect.skeleton) progress.classList.add('sr-only');
+  finish.hidden = Boolean(effect.reveal);
+  pause.hidden = Boolean(effect.reveal);
   const codeExample = get('code-example');
   const code = get('code');
   const copyStatus = get('copy-status');
@@ -48,6 +55,7 @@ function mountCard(card, effect) {
 
   card.id = effect.id;
   card.dataset.renderer = effect.renderer;
+  if (effect.skeleton) card.dataset.skeleton = '';
   if (effect.taskProgress || effect.stageProgress) card.dataset.taskProgress = '';
   const title = get('title');
   title.id = `${effect.id}-title`;
@@ -70,7 +78,7 @@ function mountCard(card, effect) {
     const field = effect.schema[name] ?? commonSchema[name];
     const initial = field.default;
     let same = initial === value;
-    if (Array.isArray(initial)) same = initial.every((part, index) => part === value[index]);
+    if (Array.isArray(initial)) same = initial.length === value.length && initial.every((part, index) => part === value[index]);
     if (field.type === 'color') same = initial.toLowerCase() === value.toLowerCase();
     if (same) delete codeOptions[name];
     else codeOptions[name] = value;
@@ -120,6 +128,7 @@ function mountCard(card, effect) {
       delete fields.speed;
       fields.activeStep = { ...fields.activeStep, max: effect.schema.steps.default.length - 1 };
     }
+    if (effect.reveal) delete fields.speed;
     const origin = effect.schema.origin?.default.slice();
     if (origin && effect !== interactiveRipple) {
       const position = { min: 0, max: 1, step: .01 };
@@ -176,6 +185,28 @@ function mountCard(card, effect) {
       row.append(label, ...(isSelect || input.type === 'checkbox' ? [] : [output]), input);
       controls.append(row);
     }
+    if (effect.reveal) {
+      const readiness = document.createElement('fieldset');
+      const heading = document.createElement('legend');
+      heading.textContent = '模拟内容分区就绪';
+      readiness.append(heading);
+      const labels = { title: '标题', body: '正文', footer: '补充信息' };
+      const checkboxes = effect.schema.readyKeys.itemChoices.map(key => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = key;
+        label.append(checkbox, ` ${labels[key]}`);
+        readiness.append(label);
+        return checkbox;
+      });
+      readiness.addEventListener('change', () => {
+        const ready = checkboxes.filter(checkbox => checkbox.checked);
+        setOption('readyKeys', ready.map(checkbox => checkbox.value));
+        get('status').textContent = `已就绪 ${ready.length} / ${checkboxes.length} 个区域`;
+      });
+      controls.append(readiness);
+    }
   }
 
   function updateProgress() {
@@ -191,7 +222,7 @@ function mountCard(card, effect) {
       setOption('progressSource', mode.value === 'estimated' ? 'estimated' : 'actual');
       setOption('progress', mode.value === 'unknown' ? null : amount);
     }
-    const label = effect.renderer === 'css' || effect.taskProgress ? '正在加载' : '正在生成图片';
+    const label = effect.renderer === 'css' || effect.taskProgress || effect.particle ? '正在加载' : '正在生成图片';
     if (mode.value === 'unknown') {
       progress.removeAttribute('role');
       for (const name of ['label', 'valuemin', 'valuemax', 'valuenow', 'valuetext']) {
@@ -201,7 +232,7 @@ function mountCard(card, effect) {
       return;
     }
     const estimated = mode.value === 'estimated';
-    const progressLabel = effect.renderer === 'css' || effect.taskProgress ? '加载进度' : '生成进度';
+    const progressLabel = effect.renderer === 'css' || effect.taskProgress || effect.particle ? '加载进度' : '生成进度';
     progress.setAttribute('role', 'progressbar');
     progress.setAttribute('aria-label', estimated ? `预计${progressLabel}` : progressLabel);
     progress.setAttribute('aria-valuemin', '0');
@@ -255,10 +286,17 @@ function mountCard(card, effect) {
     loading = createLoading(surface, { effect: effect.id }, registry);
     get('renderer').textContent = { canvas: 'Canvas 2D', css: 'CSS / DOM', static: '静态备用图形' }[loading.renderer];
     if (effect === waveProgress) progress.classList.toggle('sr-only', loading.renderer === 'canvas');
+    if (effect.reveal) {
+      setOption('content', {
+        title: '加载动效示例',
+        body: '各区域随任务结果独立显示。',
+        footer: '已读取本地数据',
+      });
+    }
     updateProgress();
     syncMotion();
     if (!effect.stageProgress) {
-      get('status').textContent = effect.renderer === 'css' || effect.taskProgress ? '正在加载' : '正在生成图片';
+      get('status').textContent = effect.renderer === 'css' || effect.taskProgress || effect.particle ? '正在加载' : '正在生成图片';
     }
   }
 

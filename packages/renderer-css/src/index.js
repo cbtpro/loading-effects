@@ -1,6 +1,6 @@
 export function createCssRenderer(element, effect) {
   const surface = element.ownerDocument.createElement('div');
-  surface.setAttribute('aria-hidden', 'true');
+  if (!effect.reveal) surface.setAttribute('aria-hidden', 'true');
   Object.assign(surface.style, {
     width: '100%', height: '100%', display: 'grid', placeItems: 'center',
     position: 'relative', overflow: 'hidden', pointerEvents: 'none',

@@ -28,3 +28,14 @@ export const gradientProgress: LoadingPreset;
 export const segmentedProgress: LoadingPreset;
 export const stepProgress: LoadingPreset;
 export const waveProgress: LoadingPreset;
+
+export const particleFlow: LoadingPreset;
+export const particleConvergence: LoadingPreset;
+export const particleExplosion: LoadingPreset;
+export const particleOrbit: LoadingPreset;
+export const particleMorph: LoadingPreset;
+export const particleNetwork: LoadingPreset;
+export const shimmerSkeleton: LoadingPreset;
+export const pulseSkeleton: LoadingPreset;
+export const staggeredSkeleton: LoadingPreset;
+export const progressiveReveal: LoadingPreset;

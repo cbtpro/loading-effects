@@ -53,6 +53,22 @@
 | 19 | particle-morph · 粒子变形 | 粒子在等点数的目标形状之间重组。 | `targets=[circle,square]`，`count=180`，`hold=400`，`duration=2600` | Canvas 2D |
 | 20 | particle-network · 粒子网络 | 漂移粒子按距离连接，连线随距离淡出。 | `count=64`，`linkDistance=36`，`maxLinks=4`（每点），`velocity=16`（px/s） | Canvas 2D |
 
+### 粒子系统实拍
+
+6 种粒子动效均使用 Canvas 2D，参数可在 Playground 中调节。布局使用确定性采样，滚动离开视口再回来时保留动画相位。粒子网络按连线距离划分网格，只比较相邻网格，并对连线两端同时应用数量上限。
+
+| 粒子流 | 粒子汇聚 |
+| --- | --- |
+| ![粒子流](assets/playground-particle-flow.png) | ![粒子汇聚](assets/playground-particle-convergence.png) |
+
+| 粒子爆发 | 粒子轨道 |
+| --- | --- |
+| ![粒子爆发](assets/playground-particle-explosion.png) | ![粒子轨道](assets/playground-particle-orbit.png) |
+
+| 粒子变形 | 粒子网络 |
+| --- | --- |
+| ![粒子变形](assets/playground-particle-morph.png) | ![粒子网络](assets/playground-particle-network.png) |
+
 ## 04 流体与液态
 
 | 编号 | 动效 ID · 名称 | 视觉与运动 | 专属参数及默认值 | 渲染 |
@@ -114,6 +130,20 @@
 | 36 | pulse-skeleton · 呼吸骨架 | 占位块在透明度范围内缓慢变化。 | `layout=text-lines`，`minOpacity=.55`，`maxOpacity=1`，`duration=1600` | CSS |
 | 37 | staggered-skeleton · 错峰骨架 | 多块占位按阅读顺序依次亮起并回落。 | `layout=text-lines`，`stagger=100`，`minOpacity=.6` | CSS |
 | 38 | progressive-reveal · 渐进揭示 | 各区内容就绪后独立替换骨架，保留布局。 | `layout=text-lines`，`readyKeys=[]`，`fadeDuration=180` | CSS |
+
+### 骨架占位实拍
+
+四种骨架共用 `text-lines` 和 `article-card` 布局。流光、呼吸和错峰骨架在减少动态模式下保留静态占位。
+
+渐进揭示通过 `content` 接收 `title`、`body`、`footer` 三个区域的文本。宿主把已就绪的键传给 `readyKeys`，对应区域独立显示文本，宽高保持一致。下图只揭示标题，正文和补充信息仍保留占位。
+
+| 流光骨架 | 呼吸骨架 |
+| --- | --- |
+| ![流光骨架](assets/playground-shimmer-skeleton.png) | ![呼吸骨架](assets/playground-pulse-skeleton.png) |
+
+| 错峰骨架 | 渐进揭示 |
+| --- | --- |
+| ![错峰骨架](assets/playground-staggered-skeleton.png) | ![渐进揭示已显示标题](assets/playground-progressive-reveal.png) |
 
 ## 08 AI 生成
 

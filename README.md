@@ -11,7 +11,7 @@ pnpm install --frozen-lockfile
 pnpm -r list --depth -1
 ```
 
-Playground 已接入 19 种预设，包括 v0.1 的 8 种基础几何、6 种点阵与波纹，以及 `v0.2.0-alpha.1` 的 5 种进度反馈。
+Playground 已接入 29 种预设。`v0.2.0-alpha.2` 补齐 6 种粒子系统和 4 种骨架占位，与已有 5 种进度反馈一起覆盖 v0.2 的动效范围。
 
 ```sh
 pnpm --filter @loading-effects/app-playground dev --port 4173
