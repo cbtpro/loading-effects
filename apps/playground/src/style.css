@@ -131,3 +131,5 @@ output { font-variant-numeric: tabular-nums; }
 .code-example [role="status"]:not(:empty) { margin-top: 8px; }
 
 .control input[type="checkbox"] { justify-self: start; align-self: center; }
+
+.control input[type="text"] { width: 100%; min-width: 0; padding: 6px; font: inherit; }

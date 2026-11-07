@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('card configuration, completion and rendering stay independent', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.effect-card')).toHaveCount(29);
+  await expect(page.locator('.effect-card')).toHaveCount(33);
   await expect(page.locator('.code-example[open]')).toHaveCount(0);
 
   const wave = page.locator('#dot-matrix-wave');
@@ -133,16 +133,18 @@ test('reduced motion keeps the interactive preview static at a narrow viewport',
   await expect.poll(() => canvas.evaluate((node, stillFrame) => node.toDataURL() !== stillFrame, still)).toBe(true);
 });
 
-test('all 29 presets render when their previews enter the viewport', async ({ page }) => {
+test('all 33 presets render when their previews enter the viewport', async ({ page }) => {
   await page.goto('/');
   const cards = page.locator('.effect-card');
-  await expect(cards).toHaveCount(29);
+  await expect(cards).toHaveCount(33);
 
   for (const card of await cards.all()) {
     await card.locator('.preview').scrollIntoViewIfNeeded();
     const renderer = await card.getAttribute('data-renderer');
     if (renderer === 'canvas') {
       await expect.poll(() => card.locator('canvas').evaluate(canvas => canvas.width)).toBeGreaterThan(0);
+    } else if (await card.locator('xpath=ancestor::section[@id="text-effects"]').count()) {
+      await expect(card.locator('.surface > div > span')).toBeVisible();
     } else if (await card.getAttribute('data-skeleton') !== null || await card.getAttribute('data-task-progress') !== null) {
       await expect.poll(() => card.locator('.surface > div > :first-child').evaluate(node => node.clientHeight)).toBeGreaterThan(0);
     } else {
@@ -287,4 +289,33 @@ test('Web Components snippets use the custom element API in JS and TS', async ({
   await example.getByRole('button', { name: 'TS', exact: true }).click();
   await expect(example.locator('code')).toContainText('const options: LoadingOptions');
   await expect(example.locator('.code-filename')).toHaveText('LoadingExample.ts');
+});
+
+test('text effects keep graphemes intact and remain readable with reduced motion', async ({ page }) => {
+  await page.goto('/');
+  const typing = page.locator('#typing-dots');
+  const line = typing.locator('.surface > div > span');
+  await line.scrollIntoViewIfNeeded();
+  const dots = line.locator('span');
+  const visibleDots = () => dots.evaluateAll(nodes => nodes.filter(node => node.style.visibility === 'visible').length);
+  const first = await visibleDots();
+  await expect.poll(visibleDots).not.toBe(first);
+  const width = (await line.boundingBox()).width;
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(visibleDots).toBe(3);
+  expect((await line.boundingBox()).width).toBe(width);
+
+  const wave = page.locator('#character-wave');
+  await wave.getByText('参数与演示进度', { exact: true }).click();
+  const input = wave.getByLabel('文字', { exact: true });
+  await input.fill('A👩🏽‍💻é');
+  await wave.locator('.preview').scrollIntoViewIfNeeded();
+  const glyphs = wave.locator('.surface > div > span > span');
+  await expect(glyphs).toHaveText(['A', '👩🏽‍💻', 'é']);
+
+  const scramble = page.locator('#scramble-text');
+  await scramble.getByText('参数与演示进度', { exact: true }).click();
+  await scramble.getByLabel('文字', { exact: true }).fill('完成✅');
+  await scramble.locator('.preview').scrollIntoViewIfNeeded();
+  await expect(scramble.locator('.surface > div > span > span > span:last-child')).toHaveText(['完', '成', '✅']);
 });

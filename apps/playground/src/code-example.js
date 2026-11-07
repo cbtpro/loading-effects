@@ -1,9 +1,11 @@
 export function buildExample(effect, framework, language, options) {
   const typescript = language === 'ts';
+  const serialized = JSON.stringify(options, null, 2).replaceAll('<', '\\u003c');
   const vue = framework === 'vue';
   const interactive = effect.id === 'interactive-ripple';
   const preset = effect.id.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
   const canvas = effect.renderer === 'canvas';
+  const text = Boolean(effect.schema.text);
   const renderer = canvas ? 'createCanvasRenderer' : 'createCssRenderer';
   if (framework === 'web-components') {
     const size = canvas ? 'width: 100%; height: 240px;' : 'width: min(100%, 360px); height: 100px;';
@@ -18,7 +20,7 @@ element.registry = {
   effects: { [${preset}.id]: ${preset} },
   renderers: { ${effect.renderer}: ${renderer} },
 };
-const options${typescript ? ': LoadingOptions' : ''} = ${JSON.stringify(options, null, 2)};
+const options${typescript ? ': LoadingOptions' : ''} = ${serialized};
 element.options = options;
 element.style.cssText = '${size}';
 document.body.append(element);${interactive ? "\nconst trigger = document.createElement('button');\ntrigger.type = 'button';\ntrigger.textContent = '从中心触发涟漪';\ntrigger.addEventListener('click', () => element.trigger([0.5, 0.5]));\ndocument.body.append(trigger);" : ''}`;
@@ -38,9 +40,9 @@ const registry = {
   effects: { [${preset}.id]: ${preset} },
   renderers: { ${effect.renderer}: ${renderer} },
 };
-const options${typescript ? ': LoadingOptions' : ''} = ${JSON.stringify(options, null, 2)};`;
+const options${typescript ? ': LoadingOptions' : ''} = ${serialized};`;
   const refType = typescript ? '<LoadingEffectHandle | null>' : '';
-  const size = canvas ? 'width: 100%; height: 240px' : 'width: 160px; height: 100px';
+  const size = canvas ? 'width: 100%; height: 240px' : text ? 'width: min(100%, 360px); height: 100px' : 'width: 160px; height: 100px';
 
   if (vue) {
     const trigger = interactive ? `
@@ -63,7 +65,7 @@ ${setup}${trigger}
 </template>`;
   }
 
-  const reactStyle = canvas ? "{ width: '100%', height: 240 }" : '{ width: 160, height: 100 }';
+  const reactStyle = canvas ? "{ width: '100%', height: 240 }" : text ? "{ width: 'min(100%, 360px)', height: 100 }" : '{ width: 160, height: 100 }';
   const component = `<LoadingEffect${interactive ? '\n        ref={loading}' : ''}
         effect="${effect.id}"
         registry={registry}

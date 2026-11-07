@@ -61,6 +61,7 @@ export interface LoadingField {
   min?: number;
   max?: number;
   step?: number;
+  maxLength?: number;
   choices?: readonly unknown[];
   itemChoices?: readonly unknown[];
   minItems?: number;
@@ -69,6 +70,7 @@ export interface LoadingField {
   normalize?(value: number): number;
 }
 
+export function splitGraphemes(text: string): string[];
 export const commonSchema: Record<string, LoadingField>;
 export function normalizeOptions(
   schema: Record<string, LoadingField>,

@@ -11,6 +11,14 @@ export const commonSchema = {
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+let graphemeSegmenter;
+
+export function splitGraphemes(text) {
+  if (typeof Intl.Segmenter !== 'function') return Array.from(text);
+  graphemeSegmenter ??= new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+  return Array.from(graphemeSegmenter.segment(text), entry => entry.segment);
+}
+
 export function normalizeOptions(schema, input, supportsColor) {
   return Object.fromEntries(Object.entries(schema).map(([key, field]) => {
     const value = input[key];
@@ -22,6 +30,8 @@ export function normalizeOptions(schema, input, supportsColor) {
     } else if (field.type === 'origin' && Array.isArray(value) &&
       value.length === 2 && value.every(Number.isFinite)) {
       result = value.map(component => clamp(component, 0, 1));
+    } else if (field.type === 'text' && typeof value === 'string' && value.trim()) {
+      result = splitGraphemes(value).slice(0, field.maxLength).join('') || field.default;
     } else if (field.type === 'labels' && Array.isArray(value) && value.length >= field.min &&
       value.length <= field.max && value.every(label => typeof label === 'string' && label.trim() && label.length <= 32)) {
       result = value.map(label => label.trim());
@@ -74,7 +84,11 @@ export function createLoading(element, { effect: id, ...input }, registry) {
   const window = document.defaultView;
   const media = window.matchMedia('(prefers-reduced-motion: reduce)');
   const schema = { ...commonSchema, ...effect.schema };
-  const resolve = () => normalizeOptions(schema, input, value => window.CSS.supports('color', value));
+  const resolve = () => {
+    const normalized = normalizeOptions(schema, input, value => window.CSS.supports('color', value));
+    if (effect.resolveDuration) normalized.duration = effect.resolveDuration(normalized);
+    return normalized;
+  };
   let options = resolve();
   const renderer = registry.renderers[effect.renderer](element, effect);
   let size = { width: 0, height: 0 };

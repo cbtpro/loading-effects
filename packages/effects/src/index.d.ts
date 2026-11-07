@@ -39,3 +39,8 @@ export const shimmerSkeleton: LoadingPreset;
 export const pulseSkeleton: LoadingPreset;
 export const staggeredSkeleton: LoadingPreset;
 export const progressiveReveal: LoadingPreset;
+
+export const typingDots: LoadingPreset;
+export const characterWave: LoadingPreset;
+export const textShimmer: LoadingPreset;
+export const scrambleText: LoadingPreset;

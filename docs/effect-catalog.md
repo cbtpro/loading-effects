@@ -88,6 +88,20 @@
 | 28 | text-shimmer · 文字流光 | 柔和高光沿字形移动。 | `text=Loading`，`highlightWidth=.28`（字宽比例），`direction=0`，`duration=1600` | CSS |
 | 29 | scramble-text · 字符解码 | 临时字符逐位锁定为目标文本，停留后进入下一轮。 | `text=Loading`，`alphabet=ABC012`，`tick=90`，`hold=500`，`seed=1` | CSS + DOM |
 
+### 文字动效实拍
+
+四种动效可在 Playground 中修改文字。输入省略号预留圆点宽度，字符解码按目标字形预留宽度，动画播放时保持行宽稳定。字符波浪和解码通过 `Intl.Segmenter` 按字素簇处理组合字符和 emoji。减少动态时直接显示可读的静态文字。
+
+| 输入省略号 | 字符波浪 |
+| --- | --- |
+| ![输入省略号](assets/playground-typing-dots.png) | ![字符波浪与组合 emoji](assets/playground-character-wave.png) |
+
+| 文字流光 | 字符解码 |
+| --- | --- |
+| ![文字流光](assets/playground-text-shimmer.png) | ![字符逐位解码](assets/playground-scramble-text.png) |
+
+字符波浪截图使用「加载中 👩🏽‍💻」和 12 px 抬升高度，其余截图使用默认参数。
+
 ## 06 进度反馈
 
 | 编号 | 动效 ID · 名称 | 视觉与运动 | 专属参数及默认值 | 渲染 |

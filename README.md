@@ -11,7 +11,7 @@ pnpm install --frozen-lockfile
 pnpm -r list --depth -1
 ```
 
-Playground 已接入 29 种预设。`v0.2.0` 包含 6 种粒子系统和 4 种骨架占位，与已有 5 种进度反馈一起覆盖 v0.2 的动效范围。
+Playground 已接入 33 种预设。`v1.0.0-alpha.1` 在 v0.2 的基础上增加输入省略号、字符波浪、文字流光和字符解码。
 
 ```sh
 pnpm --filter @loading-effects/app-playground dev --port 4173

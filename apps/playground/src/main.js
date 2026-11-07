@@ -1,9 +1,10 @@
-import { commonSchema, createLoading, normalizeProgress, progressAttributes } from '@loading-effects/core';
+import { commonSchema, createLoading, normalizeProgress, progressAttributes, splitGraphemes } from '@loading-effects/core';
 import {
   circularSpinner, bouncingDots, pulseCircle, rotatingSquares, orbitDots, elasticLine, morphingShape, flipTiles,
   circularProgress, gradientProgress, segmentedProgress, stepProgress, waveProgress,
   particleFlow, particleConvergence, particleExplosion, particleOrbit, particleMorph, particleNetwork,
   shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal,
+  typingDots, characterWave, textShimmer, scrambleText,
   dotMatrixWave, radialRipple, directionalWave, matrixBreathing, matrixVortex, interactiveRipple,
 } from '@loading-effects/effects';
 import { createCssRenderer } from '@loading-effects/renderer-css';
@@ -16,6 +17,7 @@ const groups = [
   ['progress-effects', '进度反馈', [circularProgress, gradientProgress, segmentedProgress, stepProgress, waveProgress]],
   ['particle-effects', '粒子系统', [particleFlow, particleConvergence, particleExplosion, particleOrbit, particleMorph, particleNetwork]],
   ['skeleton-effects', '骨架占位', [shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal]],
+  ['text-effects', '文字动效', [typingDots, characterWave, textShimmer, scrambleText]],
   ['geometry-effects', '基础几何', [circularSpinner, bouncingDots, pulseCircle, rotatingSquares, orbitDots, elasticLine, morphingShape, flipTiles]],
 ];
 const effects = groups.flatMap(([, , presets]) => presets);
@@ -148,7 +150,7 @@ function mountCard(card, effect) {
       if (isSelect) {
         for (const option of field.choices) input.add(new Option(option, option));
       } else {
-        input.type = { color: 'color', boolean: 'checkbox' }[field.type] ?? 'range';
+        input.type = { color: 'color', boolean: 'checkbox', text: 'text' }[field.type] ?? 'range';
       }
       const output = document.createElement('output');
       inputs[name] = input;
@@ -160,6 +162,7 @@ function mountCard(card, effect) {
       if (input.type === 'range') Object.assign(input, {
         min: autoCount ? 0 : field.min, max: field.max, step: field.step,
       });
+      if (input.type === 'text') input.maxLength = field.maxLength * 8;
       const displayDefault = name === 'gap' && field.default === 'auto' ? 18 : autoCount ? 0 : field.default;
       if (input.type === 'checkbox') input.checked = displayDefault;
       else input.value = displayDefault;
@@ -167,6 +170,10 @@ function mountCard(card, effect) {
         let current = input.value;
         if (input.type === 'range') current = input.valueAsNumber;
         if (input.type === 'checkbox') current = input.checked;
+        if (input.type === 'text') {
+          current = splitGraphemes(current).slice(0, field.maxLength).join('');
+          if (input.value !== current) input.value = current;
+        }
         const setting = autoCount && current === 0 ? 'auto' : current;
         output.value = setting === 'auto' ? '自动' : setting;
         if (autoCount) {
@@ -183,7 +190,7 @@ function mountCard(card, effect) {
       }
       sync();
       input.addEventListener('input', sync);
-      row.append(label, ...(isSelect || input.type === 'checkbox' ? [] : [output]), input);
+      row.append(label, ...(isSelect || input.type === 'checkbox' || input.type === 'text' ? [] : [output]), input);
       controls.append(row);
     }
     if (effect.reveal) {

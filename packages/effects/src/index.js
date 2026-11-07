@@ -207,3 +207,5 @@ export { circularProgress, gradientProgress, segmentedProgress, stepProgress, wa
 
 export { particleFlow, particleConvergence, particleExplosion, particleOrbit, particleMorph, particleNetwork } from './particles.js';
 export { shimmerSkeleton, pulseSkeleton, staggeredSkeleton, progressiveReveal } from './skeleton.js';
+
+export { typingDots, characterWave, textShimmer, scrambleText } from './text.js';
