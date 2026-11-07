@@ -23,7 +23,19 @@ function dot(surface, diameter) {
 
 function geometry(id, title, description, schema, layoutFields, mount) {
   return {
-    id, title, description, renderer: 'css', layoutFields, mount,
+    id, title, description, renderer: 'css', layoutFields, pointerPaint: true,
+    mount(surface, options) {
+      const draw = mount(surface, options);
+      return (phase, next, still, pointer) => {
+        draw(phase, next, still);
+        const strength = pointer?.strength ?? 0;
+        const glow = strength ? `drop-shadow(0 0 ${2 + 5 * strength}px currentColor)` : '';
+        for (const shape of surface.children) {
+          shape.style.scale = strength ? String(1 + .1 * strength) : '';
+          shape.style.filter = glow;
+        }
+      };
+    },
     schema: {
       color: { type: 'color', default: '#2359BE', label: '动效颜色' },
       duration: duration(1200),

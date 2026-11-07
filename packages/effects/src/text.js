@@ -75,6 +75,7 @@ export const textShimmer = {
   title: '文字流光',
   description: '高光沿文字表面移动，字形与文字宽度保持稳定。',
   renderer: 'css',
+  pointerPaint: true,
   layoutFields: ['text'],
   schema: {
     ...base,
@@ -86,9 +87,10 @@ export const textShimmer = {
     const node = label(surface);
     node.textContent = text;
     node.style.backgroundClip = 'text';
-    return (phase, { color, highlightWidth, direction }, still) => {
+    return (phase, { color, highlightWidth, direction }, still, pointer) => {
       const half = highlightWidth * 50;
-      const center = phase * (100 + 2 * half) - half;
+      const moving = phase * (100 + 2 * half) - half;
+      const center = moving + ((pointer?.x ?? .5) * 100 - moving) * (pointer?.strength ?? 0);
       node.style.color = still || !node.style.backgroundClip ? color : 'transparent';
       node.style.backgroundImage = still ? 'none' :
         `linear-gradient(${90 + direction}deg, ${color} ${center - half}%, color-mix(in srgb, ${color}, white 48%) ${center}%, ${color} ${center + half}%)`;

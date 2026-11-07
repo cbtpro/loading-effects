@@ -1,3 +1,5 @@
+import { bendSurface } from './pointer.js';
+
 const progressSchema = {
   progress: { default: null, min: 0, max: 100 },
   progressSource: { default: 'actual', choices: ['actual', 'estimated'] },
@@ -163,6 +165,7 @@ export const stepProgress = {
   description: '按宿主提供的阶段标记已完成、当前与待开始的步骤。',
   renderer: 'css',
   stageProgress: true,
+  pointerPaint: true,
   layoutFields: ['steps'],
   schema: {
     color: progressSchema.color,
@@ -196,10 +199,13 @@ export const stepProgress = {
       return { item, marker, label };
     });
     surface.append(row);
-    return (_, { activeStep, color, showLabels }) => {
+    return (_, { activeStep, color, showLabels }, _still, pointer) => {
       const current = Math.min(activeStep, nodes.length - 1);
       nodes.forEach(({ item, marker, label }, index) => {
         item.dataset.state = index < current ? 'completed' : index === current ? 'current' : 'pending';
+        const hovered = Math.min(nodes.length - 1, Math.floor((pointer?.x ?? 0) * nodes.length));
+        const strength = hovered === index ? pointer?.strength ?? 0 : 0;
+        marker.style.boxShadow = strength ? `0 0 0 ${3 * strength}px color-mix(in srgb, ${color} 35%, transparent)` : '';
         marker.textContent = index < current ? '✓' : String(index + 1);
         marker.style.background = index <= current ? color : 'transparent';
         marker.style.color = index <= current ? '#fff' : 'currentColor';
@@ -232,7 +238,7 @@ export function updateWaveLevel(state, elapsed, options, still) {
   return state.level;
 }
 
-export function drawWaveTank(ctx, tank, elapsed, options, state, _size, still) {
+export function drawWaveTank(ctx, tank, elapsed, options, state, _size, still, pointer) {
   const { progress, progressSource, duration, amplitude, wavelength, showValue, color, opacity } = options;
   const levelPercent = updateWaveLevel(state, elapsed, options, still);
   const { x, y, width, height } = tank;
@@ -254,12 +260,16 @@ export function drawWaveTank(ctx, tank, elapsed, options, state, _size, still) {
     const level = height * levelPercent / 100;
     const wave = Math.min(amplitude, level, height - level);
     const bottom = y + height;
+    const surfaceY = bottom - level;
+    const limit = Math.min(12, level, height - level);
+    const surfaceAt = dx => surfaceY + wave * Math.sin(dx / wavelength * Math.PI * 2 - phase) +
+      bendSurface(pointer, x + dx, surfaceY, limit);
     ctx.beginPath();
     ctx.moveTo(x, bottom);
     for (let dx = 0; dx < width; dx += 2) {
-      ctx.lineTo(x + dx, bottom - level + wave * Math.sin(dx / wavelength * Math.PI * 2 - phase));
+      ctx.lineTo(x + dx, surfaceAt(dx));
     }
-    ctx.lineTo(x + width, bottom - level + wave * Math.sin(width / wavelength * Math.PI * 2 - phase));
+    ctx.lineTo(x + width, surfaceAt(width));
     ctx.lineTo(x + width, bottom);
     ctx.closePath();
     ctx.fill();

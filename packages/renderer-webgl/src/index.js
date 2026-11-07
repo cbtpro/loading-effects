@@ -71,18 +71,18 @@ export function createWebGLRenderer(element, effect) {
 precision highp float;
 uniform vec2 uSize;
 uniform vec2 uBufferSize;
-uniform vec2 uPointerOffset;
+uniform vec3 uPointer;
 uniform vec4 uColor;
 uniform float uPhase;
 out vec4 fragment;
 ${effect.fragment}
 void main() {
   vec2 uv = gl_FragCoord.xy / uBufferSize;
-  fragment = effectColor(vec2(uv.x, 1.0 - uv.y) * uSize - uPointerOffset);
+  fragment = effectColor(vec2(uv.x, 1.0 - uv.y) * uSize);
 }`);
     if (program) {
       locations = Object.fromEntries(
-        ['uSize', 'uBufferSize', 'uPointerOffset', 'uColor', 'uPhase', ...Object.keys(uniforms)]
+        ['uSize', 'uBufferSize', 'uPointer', 'uColor', 'uPhase', ...Object.keys(uniforms)]
           .map(name => [name, gl.getUniformLocation(program, name)]),
       );
       gl.useProgram(program);
@@ -136,14 +136,14 @@ void main() {
       canvas.width = ratio ? Math.max(1, Math.floor(width * ratio)) : 0;
       canvas.height = ratio ? Math.max(1, Math.floor(height * ratio)) : 0;
     },
-    render(elapsed, _options, _still, [x, y] = [0, 0]) {
+    render(elapsed, _options, _still, pointer) {
       if (!program || !canvas.width || !canvas.height || gl.isContextLost()) return;
       const width = gl.drawingBufferWidth;
       const height = gl.drawingBufferHeight;
       gl.viewport(0, 0, width, height);
       gl.uniform2f(locations.uSize, size.width, size.height);
       gl.uniform2f(locations.uBufferSize, width, height);
-      gl.uniform2f(locations.uPointerOffset, x, y);
+      gl.uniform3f(locations.uPointer, (pointer?.x ?? .5) * size.width, (pointer?.y ?? .5) * size.height, pointer?.strength ?? 0);
       gl.uniform4f(locations.uColor, rgba[0], rgba[1], rgba[2], rgba[3] * options.opacity);
       const phase = elapsed / options.duration;
       gl.uniform1f(locations.uPhase, options.loop ? phase % 1 : Math.min(1, phase));

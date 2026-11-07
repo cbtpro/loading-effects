@@ -1,3 +1,5 @@
+import { pointerWeight } from './pointer.js';
+
 const tau = 2 * Math.PI;
 
 const matrixSchema = {
@@ -47,10 +49,10 @@ function prepareGrid({ width, height }, options, spatialPhase) {
   return { points, maxRadius: .42 * Math.min(stepX, stepY) };
 }
 
-function drawGrid(context, { points, maxRadius }, options, waveAt) {
+function drawGrid(context, { points, maxRadius }, options, waveAt, pointer) {
   context.fillStyle = options.color;
   for (const point of points) {
-    const wave = waveAt(point);
+    const wave = Math.min(1, waveAt(point) + pointerWeight(pointer, point.x, point.y, 96) * .65);
     const radius = Math.min(.6 + point.weight * (.75 + options.amplitude * wave), maxRadius);
     context.globalAlpha = options.opacity * Math.min(.9, .13 + point.weight * (.18 + .5 * wave));
     context.beginPath();
@@ -77,9 +79,9 @@ function matrixEffect(id, title, description, motionFields, layoutFields, spatia
     schema: { ...matrixSchema, ...motionFields },
     layoutFields: [...gridFields, ...layoutFields],
     prepare: (size, options) => prepareGrid(size, options, spatialPhase),
-    draw(context, layout, elapsed, options) {
+    draw(context, layout, elapsed, options, _state, _size, _still, pointer) {
       const phase = tau * ((elapsed % options.duration) / options.duration);
-      drawGrid(context, layout, options, point => wave(point.phase - phase, options));
+      drawGrid(context, layout, options, point => wave(point.phase - phase, options), pointer);
     },
   };
 }
@@ -175,7 +177,7 @@ export const interactiveRipple = {
     state.splice(0, Math.max(0, state.length - options.maxRipples));
   },
   isActive: state => state.length > 0,
-  draw(context, layout, elapsed, options, state, { width, height }) {
+  draw(context, layout, elapsed, options, state, { width, height }, _still, pointer) {
     while (state.length && (state.length > options.maxRipples || elapsed - state[0].start >= options.lifetime)) {
       state.shift();
     }
@@ -195,7 +197,7 @@ export const interactiveRipple = {
         wave = Math.max(wave, ripple.strength * (.5 + .5 * Math.cos(Math.PI * edge)));
       }
       return wave;
-    });
+    }, pointer);
   },
 };
 

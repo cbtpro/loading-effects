@@ -117,9 +117,9 @@ document.body.append(element);
 
 `registry` 和复杂参数通过 JS property 传入。标量 HTML 属性可覆盖 `options`，例如设置 `progress="80"` 后显示 80，移除该属性则恢复到 `options.progress`。从 DOM 移除元素会销毁实例，再插入时读取当前配置。显式注册在浏览器执行，模块可在服务端导入。
 
-## 鼠标跟随
+## 鼠标交互
 
-默认开启 `pointerReactive`。鼠标在动效容器内移动时，画面随位置轻微偏移，移出后平滑回到原位。CSS、Canvas 2D 和 WebGL 2 均支持。暂停、减少动态、触屏输入和静态降级时停止跟随。
+默认开启 `pointerReactive`。动效根据鼠标在容器内的位置改变自身的绘制。粒子网络吸引附近粒子并重新计算连线，点阵加强附近点的亮度，液面在鼠标附近弯曲。鼠标移出后，交互逐渐消退。暂停、减少动态、触屏输入和静态降级时不触发鼠标交互。
 
 在 Playground 的「参数与演示进度」中取消勾选「响应鼠标」即可关闭。接入代码中可传入 `pointerReactive: false`。Web Components 支持 `pointer-reactive="false"`。
 

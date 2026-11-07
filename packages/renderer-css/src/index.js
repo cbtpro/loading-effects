@@ -28,14 +28,15 @@ export function createCssRenderer(element, effect) {
         draw = effect.mount(surface, options);
       }
     },
-    render(elapsed, _options, still, [x, y] = [0, 0]) {
+    render(elapsed, _options, still, pointer) {
       const progress = options.loop
         ? (elapsed % options.duration) / options.duration
         : Math.min(1, elapsed / options.duration);
-      draw(progress, options, still);
-      const translate = x || y ? `${x}px ${y}px` : '';
-      for (const child of surface.children) {
-        if (child.style.translate !== translate) child.style.translate = translate;
+      draw(progress, options, still, pointer);
+      if (!effect.pointerPaint) {
+        const strength = pointer?.strength ?? 0;
+        const brightness = effect.taskProgress ? .15 : .28;
+        surface.style.filter = strength ? `brightness(${1 + brightness * strength})` : '';
       }
     },
     destroy: () => surface.remove(),

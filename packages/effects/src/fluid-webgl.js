@@ -3,6 +3,11 @@ const base = {
 };
 const fragmentHelpers = `
 const float TAU = 6.28318530718;
+float pointerWeight(vec2 point, float radius) {
+  vec2 d = (point - uPointer.xy) / radius;
+  float influence = max(0.0, 1.0 - dot(d, d));
+  return influence * influence * uPointer.z;
+}
 vec4 tint(float coverage, float light) {
   return vec4(mix(uColor.rgb, vec3(1.0), light), uColor.a * coverage);
 }`;
@@ -40,6 +45,7 @@ vec4 effectColor(vec2 point) {
     vec2 d = p - vec2(cos(angle), sin(angle)) * distanceToCenter;
     field += exp(-dot(d, d) / max(radius * radius, .001));
   }
+  field += pointerWeight(point, max(12.0, radius * 2.4)) * min(1.0, field * 2.0) * .55;
   return tint(smoothstep(uThreshold - .055, uThreshold + .055, field), .15 + .12 * sin(p.y / max(radius, .1)));
 }`,
 };
@@ -72,6 +78,8 @@ vec4 effectColor(vec2 point) {
   float turn = radians(uTwist) * t + uPhase * TAU;
   float amplitude = min(uAmplitude, uSize.y * .32);
   float center = amplitude * sin(t * TAU - uPhase * TAU);
+  vec2 spine = vec2(point.x, uSize.y * .5 + center);
+  center += clamp(uPointer.y - spine.y, -22.0, 22.0) * pointerWeight(spine, 84.0) * .65;
   float halfWidth = max(.65, uWidth * .5 * abs(cos(turn))) * smoothstep(0.0, .13, min(t, 1.0 - t));
   float y = p.y - center;
   float outline = min(halfWidth - abs(y), lengthPx * min(t, 1.0 - t));
@@ -107,6 +115,8 @@ vec4 effectColor(vec2 point) {
   float growth = smoothstep(0.0, .58, uPhase) * (1.0 - smoothstep(.68, 1.0, uPhase));
   float radius = min(uRadius, min(uSize.x, uSize.y) * .44) * (.24 + .76 * growth);
   float edge = radius * (.9 + .1 * sin(angle * 5.0 + uSeed) + .07 * sin(angle * 9.0 - uSeed * .7));
+  vec2 contour = uSize * uOrigin + vec2(cos(angle), sin(angle)) * edge;
+  edge += pointerWeight(contour, 85.0) * radius * .36;
   float softness = max(1.0, radius * (.1 + .5 * uSoftness));
   float grain = .84 + .16 * sin(dot(p, vec2(.16, .27)) + sin(p.x * .22 + uSeed));
   float coverage = (1.0 - smoothstep(edge - softness, edge, length(p))) * grain;

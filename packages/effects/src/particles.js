@@ -1,3 +1,5 @@
+import { pointerWeight } from './pointer.js';
+
 const tau = Math.PI * 2;
 const unit = value => value - Math.floor(value);
 const reflect = value => 1 - Math.abs(2 * unit(value / 2) - 1);
@@ -31,9 +33,9 @@ function particleEffect(id, title, description, schema, draw) {
       }));
       return { width, height, points };
     },
-    draw(ctx, layout, elapsed, options) {
+    draw(ctx, layout, elapsed, options, _state, _size, _still, pointer) {
       ctx.fillStyle = options.color;
-      draw(ctx, layout, elapsed, options);
+      draw(ctx, layout, elapsed, options, pointer);
       ctx.globalAlpha = 1;
     },
   };
@@ -48,7 +50,7 @@ export const particleFlow = /* @__PURE__ */ particleEffect(
     curvature: /* @__PURE__ */ number('弯曲度', .2, 0, 1, .05),
     lifetime: /* @__PURE__ */ number('寿命（ms）', 3000, 500, 8000, 100),
   },
-  (ctx, { width, height, points }, elapsed, options) => {
+  (ctx, { width, height, points }, elapsed, options, pointer) => {
     const angle = options.direction / 360 * tau;
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
@@ -60,7 +62,11 @@ export const particleFlow = /* @__PURE__ */ particleEffect(
       const u = (p.x + t - Math.floor(p.phase + t)) * path + (p.phase - .5) * (span - path);
       const v = (p.y - .5) * breadth + Math.sin((u / span + p.y) * tau) * breadth * options.curvature * .35;
       const opacity = Math.sin(Math.PI * unit(p.phase + t)) * options.opacity;
-      dot(ctx, width / 2 + u * cos - v * sin, height / 2 + u * sin + v * cos, p.radius, opacity);
+      const x = width / 2 + u * cos - v * sin;
+      const y = height / 2 + u * sin + v * cos;
+      const influence = pointerWeight(pointer, x, y, 85);
+      const bend = influence * ((pointer?.x ?? x) * -sin + (pointer?.y ?? y) * cos - (x * -sin + y * cos));
+      dot(ctx, x + bend * sin * .65, y - bend * cos * .65, p.radius, opacity);
     }
   },
 );
@@ -72,9 +78,12 @@ export const particleConvergence = /* @__PURE__ */ particleEffect(
     attraction: /* @__PURE__ */ number('加速度（px/s²）', 90, 20, 300),
     fadeRadius: /* @__PURE__ */ number('淡出半径（px）', 18, 4, 100),
   },
-  (ctx, { width, height, points }, elapsed, options) => {
-    const ox = options.origin[0] * width;
-    const oy = options.origin[1] * height;
+  (ctx, { width, height, points }, elapsed, options, pointer) => {
+    const strength = (pointer?.strength ?? 0) * .75;
+    const centerX = options.origin[0] * width;
+    const centerY = options.origin[1] * height;
+    const ox = centerX + ((pointer?.x ?? centerX) - centerX) * strength;
+    const oy = centerY + ((pointer?.y ?? centerY) - centerY) * strength;
     for (const p of points) {
       const angle = p.x * tau;
       const dx = Math.cos(angle);
@@ -100,13 +109,17 @@ export const particleExplosion = /* @__PURE__ */ particleEffect(
     decay: /* @__PURE__ */ number('衰减', .65, 0, 1, .05),
     duration: /* @__PURE__ */ duration(2200),
   },
-  (ctx, { width, height, points }, elapsed, options) => {
+  (ctx, { width, height, points }, elapsed, options, pointer) => {
     const radius = Math.min(options.spreadRadius, Math.min(width, height) * .48);
     for (const p of points) {
       const t = unit(elapsed / options.duration + p.phase * .15 + .12);
       const spread = Math.sin(t * Math.PI);
       const distance = radius * spread * p.speed / 1.25;
-      dot(ctx, width / 2 + Math.cos(p.x * tau) * distance, height / 2 + Math.sin(p.x * tau) * distance,
+      const dx = Math.cos(p.x * tau);
+      const dy = Math.sin(p.x * tau);
+      const influence = pointerWeight(pointer, width / 2 + dx * distance, height / 2 + dy * distance, 88);
+      const radiusBoost = distance * (1 + influence * .28);
+      dot(ctx, width / 2 + dx * radiusBoost, height / 2 + dy * radiusBoost,
         p.radius, options.opacity * (1 - spread * options.decay) * Math.min(1, spread * 8));
     }
   },
@@ -121,13 +134,19 @@ export const particleOrbit = /* @__PURE__ */ particleEffect(
     speedSpread: /* @__PURE__ */ number('轨道速度差', .3, 0, 1, .05),
     duration: /* @__PURE__ */ duration(2600),
   },
-  (ctx, { width, height, points }, elapsed, options) => {
+  (ctx, { width, height, points }, elapsed, options, pointer) => {
     const step = Math.min(options.ringGap, Math.min(width, height) * .42 / options.rings);
     points.forEach((p, index) => {
       const ring = index % options.rings;
       const angle = (p.phase + elapsed / options.duration * (1 + ring * options.speedSpread)) * tau;
       const radius = step * (ring + 1);
-      dot(ctx, width / 2 + Math.cos(angle) * radius, height / 2 + Math.sin(angle) * radius,
+      const dx = Math.cos(angle);
+      const dy = Math.sin(angle);
+      const x = width / 2 + dx * radius;
+      const y = height / 2 + dy * radius;
+      const influence = pointerWeight(pointer, x, y, 80);
+      const bend = ((pointer?.x ?? x) - x) * dx + ((pointer?.y ?? y) - y) * dy;
+      dot(ctx, x + dx * bend * influence * .55, y + dy * bend * influence * .55,
         p.radius, (.5 + .5 * p.y) * options.opacity);
     });
   },
@@ -141,7 +160,7 @@ export const particleMorph = /* @__PURE__ */ particleEffect(
     hold: /* @__PURE__ */ number('停留（ms）', 400, 0, 1000, 50),
     duration: /* @__PURE__ */ duration(2600),
   },
-  (ctx, { width, height, points }, elapsed, options) => {
+  (ctx, { width, height, points }, elapsed, options, pointer) => {
     const radius = Math.min(width, height) * .36;
     const segment = options.duration / options.targets.length;
     const phase = elapsed % options.duration / segment;
@@ -157,7 +176,10 @@ export const particleMorph = /* @__PURE__ */ particleEffect(
       const from = options.targets[index] === 'square' ? square : 1;
       const to = options.targets[next] === 'square' ? square : 1;
       const distance = radius * Math.sqrt(p.y) * (from + (to - from) * mix);
-      dot(ctx, width / 2 + dx * distance, height / 2 + dy * distance, p.radius * .8, .75 * options.opacity);
+      const x = width / 2 + dx * distance;
+      const y = height / 2 + dy * distance;
+      const glow = pointerWeight(pointer, x, y, 88);
+      dot(ctx, x, y, p.radius * (.8 + .7 * glow), (.75 + .25 * glow) * options.opacity);
     }
   },
 );
@@ -170,7 +192,7 @@ export const particleNetwork = /* @__PURE__ */ particleEffect(
     maxLinks: { .../* @__PURE__ */ number('每点连线上限', 4, 1, 8), integer: true },
     velocity: /* @__PURE__ */ number('漂移速度（px/s）', 16, 0, 80),
   },
-  (ctx, { width, height, points }, elapsed, options) => {
+  (ctx, { width, height, points }, elapsed, options, pointer) => {
     const cell = options.linkDistance;
     const buckets = new Map();
     const travel = elapsed * options.velocity / 1000;
@@ -178,6 +200,11 @@ export const particleNetwork = /* @__PURE__ */ particleEffect(
       const angle = p.phase * tau;
       p.px = reflect(p.x + Math.cos(angle) * travel / width) * width;
       p.py = reflect(p.y + Math.sin(angle) * travel / height) * height;
+      const pull = pointerWeight(pointer, p.px, p.py, Math.max(120, cell * 2)) * .9;
+      if (pull) {
+        p.px += (pointer.x - p.px) * pull;
+        p.py += (pointer.y - p.py) * pull;
+      }
       p.column = Math.floor(p.px / cell);
       p.row = Math.floor(p.py / cell);
       p.links = 0;

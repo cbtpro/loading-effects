@@ -100,8 +100,8 @@ export function createLoading(element, { effect: id, ...input }, registry) {
   let frame = null;
   let previous = null;
   let elapsed = 0;
-  const target = [0, 0];
-  const offset = [0, 0];
+  const pointer = { x: .5, y: .5, strength: 0 };
+  let targetStrength = 0;
 
   const isStatic = () => options.reducedMotion === 'static' || media.matches;
   const visible = () => size.width > 0 && size.height > 0 && inView && !document.hidden;
@@ -110,28 +110,28 @@ export function createLoading(element, { effect: id, ...input }, registry) {
     (renderer.isActive?.() ?? (options.loop || elapsed < options.duration));
   const pointerEnabled = () => allowsMotion() && options.pointerReactive && renderer.supportsPointer;
   const running = () => visible() && (animationRunning() ||
-    (pointerEnabled() && (offset[0] !== target[0] || offset[1] !== target[1])));
+    (pointerEnabled() && pointer.strength !== targetStrength));
 
   function movePointer(event) {
     if (event.pointerType !== 'mouse' || !pointerEnabled()) return;
     const bounds = element.getBoundingClientRect();
     if (!bounds.width || !bounds.height) return;
-    const reach = Math.min(10, Math.min(bounds.width, bounds.height) * .06);
-    target[0] = clamp((event.clientX - bounds.left) / bounds.width * 2 - 1, -1, 1) * reach;
-    target[1] = clamp((event.clientY - bounds.top) / bounds.height * 2 - 1, -1, 1) * reach;
+    pointer.x = clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
+    pointer.y = clamp((event.clientY - bounds.top) / bounds.height, 0, 1);
+    targetStrength = 1;
     schedule();
+    // A settled pointer can move again on effects with no animation clock.
+    if (visible() && frame === null) draw();
   }
 
   function leavePointer() {
-    target.fill(0);
+    targetStrength = 0;
     schedule();
   }
 
   function advancePointer() {
-    for (let index = 0; index < 2; index++) {
-      const distance = target[index] - offset[index];
-      offset[index] = Math.abs(distance) < .08 ? target[index] : offset[index] + distance * .24;
-    }
+    const delta = targetStrength - pointer.strength;
+    pointer.strength = Math.abs(delta) < .01 ? targetStrength : pointer.strength + delta * .24;
   }
 
   function draw() {
@@ -141,7 +141,7 @@ export function createLoading(element, { effect: id, ...input }, registry) {
         layoutPending = false;
       }
       const still = isStatic();
-      renderer.render(still ? 0 : elapsed, options, still, offset);
+      renderer.render(still ? 0 : elapsed, options, still, pointer);
     }
   }
 
@@ -175,8 +175,8 @@ export function createLoading(element, { effect: id, ...input }, registry) {
 
   function refresh() {
     if (!visible() || !pointerEnabled()) {
-      target.fill(0);
-      offset.fill(0);
+      targetStrength = 0;
+      pointer.strength = 0;
     }
     draw();
     schedule();
@@ -237,11 +237,7 @@ export function createLoading(element, { effect: id, ...input }, registry) {
     trigger(origin) {
       if (destroyed || !renderer.trigger || !visible() || options.paused || isStatic() ||
         !Array.isArray(origin) || origin.length !== 2 || !origin.every(Number.isFinite)) return;
-      const position = [
-        clamp(origin[0] - offset[0] / size.width, 0, 1),
-        clamp(origin[1] - offset[1] / size.height, 0, 1),
-      ];
-      renderer.trigger(position, elapsed, options);
+      renderer.trigger(origin.map(value => clamp(value, 0, 1)), elapsed, options);
       refresh();
     },
     destroy() {

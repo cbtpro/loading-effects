@@ -43,13 +43,16 @@ const breathe = phase => .5 - .5 * Math.cos(phase * Math.PI * 2);
 
 function skeletonEffect(id, title, description, schema, paint) {
   return {
-    id, title, description, renderer: 'css', skeleton: true, layoutFields: ['layout'],
+    id, title, description, renderer: 'css', skeleton: true, pointerPaint: true, layoutFields: ['layout'],
     schema: { ...base, ...schema },
     mount(surface, options) {
       const regions = skeletonRows(surface, options.layout);
-      return (phase, next, still) => regions.forEach(({ placeholder }, index) => {
+      return (phase, next, still, pointer) => regions.forEach(({ placeholder }, index) => {
         placeholder.style.borderRadius = `${next.cornerRadius}px`;
         paint(placeholder.style, phase, next, index, still);
+        const hovered = Math.min(regions.length - 1, Math.floor((pointer?.y ?? 0) * regions.length));
+        const strength = index === hovered ? pointer?.strength ?? 0 : 0;
+        placeholder.style.filter = strength ? `brightness(${1 + strength * .3})` : '';
       });
     },
   };

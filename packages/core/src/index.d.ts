@@ -31,7 +31,7 @@ export interface LoadingRenderer {
   supportsPointer?: boolean;
   resize(size: { width: number; height: number }, dpr: number, options: LoadingOptions): void;
   update(options: LoadingOptions): void;
-  render(elapsed: number, options: LoadingOptions, still: boolean, pointer?: readonly [number, number]): void;
+  render(elapsed: number, options: LoadingOptions, still: boolean, pointer?: { x: number; y: number; strength: number }): void;
   isActive?(): boolean;
   setRefresh?(refresh: () => void): void;
   trigger?(origin: [number, number], elapsed: number, options: LoadingOptions): void;

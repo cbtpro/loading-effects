@@ -26,7 +26,7 @@
 | `loop`、`paused` | 布尔，true、false | 单次播放到终帧后停止。暂停冻结当前相位，独立于进度更新 |
 | `progress`、`progressSource` | 0–100 或 null，默认 null。来源为 `actual` 或 `estimated`，默认 actual | 进度由宿主更新，非有限值回到 null。实际百分比和估算必须明确区分 |
 | `density`、`amplitude` | 可选数字 | 仅在支持的预设生效，由该预设声明单位和范围 |
-| `pointerReactive` | 布尔，默认 true | 鼠标进入并移动时，渲染内容向鼠标轻微偏移，离开时回到原位 |
+| `pointerReactive` | 布尔，默认 true | 默认向渲染器传递归一化的鼠标坐标与交互强度，由各动效调整局部绘制 |
 | `opacity` | 0–1，1 | 统一乘在视觉层，语义层独立 |
 | 实例的 `renderer` | `css`、`canvas`、`webgl` 或 `static` | 预设指定后端，实例报告实际结果。Canvas 2D 或 WebGL 2 不可用时返回 `static` |
 | `reducedMotion` | `system` 或 `static`，默认 system | system 跟随系统偏好，static 始终使用静态姿态 |

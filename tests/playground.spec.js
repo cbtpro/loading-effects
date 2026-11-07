@@ -418,8 +418,8 @@ test('WebGL fluid shaders draw pixels and recover from context loss', async ({ p
   await expect.poll(() => canvas.evaluate(node => {
     const gl = node.getContext('webgl2');
     const program = gl.getParameter(gl.CURRENT_PROGRAM);
-    return gl.getUniform(program, gl.getUniformLocation(program, 'uPointerOffset'))[0];
-  })).toBeLessThan(-1);
+    return gl.getUniform(program, gl.getUniformLocation(program, 'uPointer'))[2];
+  })).toBeGreaterThan(.4);
   await canvas.evaluate(node => {
     const extension = node.getContext('webgl2').getExtension('WEBGL_lose_context');
     node.addEventListener('webglcontextlost', () => setTimeout(() => extension.restoreContext(), 800), { once: true });
@@ -486,45 +486,53 @@ test('liquid fill opens with visible progress even without Canvas 2D', async ({ 
   await expect.poll(() => fill.evaluate(node => node.style.height)).toBe('63%');
 });
 
-test('pointer movement shifts the effect and leaving restores the original position', async ({ page }) => {
+test('nearby network particles move toward the mouse and distant particles stay in place', async ({ page }) => {
   await page.addInitScript(() => {
     const prototype = CanvasRenderingContext2D.prototype;
     const clear = prototype.clearRect;
-    const translate = prototype.translate;
+    const arc = prototype.arc;
     prototype.clearRect = function (...args) {
-      if (this.canvas.closest('#interactive-ripple')) window.rippleOffset = [0, 0];
+      if (this.canvas.closest('#particle-network')) window.networkPoints = [];
       return clear.apply(this, args);
     };
-    prototype.translate = function (x, y) {
-      if (this.canvas.closest('#interactive-ripple')) window.rippleOffset = [x, y];
-      return translate.call(this, x, y);
+    prototype.arc = function (x, y, ...args) {
+      if (this.canvas.closest('#particle-network')) window.networkPoints?.push([x, y]);
+      return arc.call(this, x, y, ...args);
     };
   });
   await page.goto('/');
+  const network = page.locator('#particle-network');
+  const surface = network.locator('.surface');
+  await network.getByText('参数与演示进度', { exact: true }).click();
+  await network.getByLabel('漂移速度（px/s）').fill('0');
+  await surface.scrollIntoViewIfNeeded();
+  const points = () => page.evaluate(() => window.networkPoints);
+  await expect.poll(async () => (await points())?.length).toBe(64);
+  const baseline = await points();
+  const {width, height} = await surface.boundingBox();
+  const near = baseline.findIndex(([x, y]) => x > 40 && x < width - 70 && y > 40 && y < height - 40);
+  expect(near).toBeGreaterThanOrEqual(0);
+  const target = { x: Math.round(baseline[near][0] + 35), y: Math.round(baseline[near][1]) };
+  const distance = ([x, y]) => Math.hypot(target.x - x, target.y - y);
+  const far = baseline.findIndex(point => distance(point) > 160);
+  expect(far).toBeGreaterThanOrEqual(0);
+  await surface.hover({ position: target });
+  await expect.poll(async () => distance((await points())[near])).toBeLessThan(distance(baseline[near]) - 10);
+  expect((await points())[far]).toEqual(baseline[far]);
+  await network.getByRole('checkbox', { name: '响应鼠标' }).uncheck();
+  await surface.hover({ position: target });
+  await expect.poll(points).toEqual(baseline);
+});
+
+test('hover highlights a nearby stage without changing the selected step', async ({ page }) => {
+  await page.goto('/');
   const stage = page.locator('#step-progress');
   const surface = stage.locator('.surface');
-  const stageContent = surface.locator('ol');
+  const first = stage.locator('li span').first();
   await surface.scrollIntoViewIfNeeded();
   await surface.hover({ position: { x: 12, y: 12 } });
-  await expect.poll(() => stageContent.evaluate(node => node.style.translate)).toMatch(/-/);
+  await expect.poll(() => first.evaluate(node => node.style.boxShadow)).not.toBe('');
+  await expect(stage.locator('li[data-state="current"]')).toHaveCount(1);
   await stage.getByText('参数与演示进度', { exact: true }).hover();
-  await expect.poll(() => stageContent.evaluate(node => node.style.translate)).toBe('');
-
-  await stage.getByText('参数与演示进度', { exact: true }).click();
-  const toggle = stage.getByRole('checkbox', { name: '响应鼠标' });
-  await expect(toggle).toBeChecked();
-  await toggle.uncheck();
-  await surface.hover({ position: { x: 12, y: 12 } });
-  await page.waitForTimeout(150);
-  expect(await stageContent.evaluate(node => node.style.translate)).toBe('');
-
-  const ripple = page.locator('#interactive-ripple');
-  const canvas = ripple.locator('canvas');
-  await ripple.locator('.surface').scrollIntoViewIfNeeded();
-  await expect.poll(() => canvas.evaluate(node => node.width)).toBeGreaterThan(0);
-  const offset = () => page.evaluate(() => window.rippleOffset);
-  await ripple.locator('.surface').hover({ position: { x: 16, y: 16 } });
-  await expect.poll(async () => (await offset())?.[0]).toBeLessThan(-1);
-  await ripple.getByRole('button', { name: '从中心触发涟漪' }).hover();
-  await expect.poll(offset).toEqual([0, 0]);
+  await expect.poll(() => first.evaluate(node => node.style.boxShadow)).toBe('');
 });

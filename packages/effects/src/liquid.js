@@ -1,3 +1,4 @@
+import { bendSurface, pointerWeight } from './pointer.js';
 import { waveSchema, createWaveState, updateWaveLevel } from './progress.js';
 
 const tau = Math.PI * 2;
@@ -16,7 +17,7 @@ export const liquidBlob = {
     duration: { default: 2800, min: 500, max: 8000, step: 100, label: '周期（ms）' },
   },
   prepare: ({ width, height }) => ({ x: width / 2, y: height / 2, limit: Math.min(width, height) * .46 }),
-  draw(ctx, { x, y, limit }, elapsed, { radius, lobes, amplitude, duration, color, opacity }) {
+  draw(ctx, { x, y, limit }, elapsed, { radius, lobes, amplitude, duration, color, opacity }, _state, _size, _still, pointer) {
     const r = Math.min(radius, limit);
     const a = Math.min(amplitude, r * .45, limit - r);
     const phase = elapsed % duration / duration * tau;
@@ -26,10 +27,15 @@ export const liquidBlob = {
     ctx.beginPath();
     for (let index = 0; index < 96; index++) {
       const angle = index / 96 * tau;
-      const distance = r + a * (.74 * Math.sin(lobes * angle - phase) +
+      const baseDistance = r + a * (.74 * Math.sin(lobes * angle - phase) +
         .26 * Math.sin((lobes - 1) * angle + phase));
-      const px = x + distance * Math.cos(angle);
-      const py = y + distance * Math.sin(angle);
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      const strength = pointerWeight(pointer, x + baseDistance * cos, y + baseDistance * sin, 72);
+      const pull = (pointer?.x ?? x) * cos + (pointer?.y ?? y) * sin - (x * cos + y * sin + baseDistance);
+      const distance = Math.max(1, Math.min(limit, baseDistance + strength * Math.max(-8, Math.min(10, pull))));
+      const px = x + distance * cos;
+      const py = y + distance * sin;
       if (index === 0) ctx.moveTo(px, py);
       else ctx.lineTo(px, py);
     }
@@ -44,21 +50,25 @@ export const liquidBlob = {
   },
 };
 
-function drawLayer(ctx, tank, level, amplitude, wavelength, phase) {
+function drawLayer(ctx, tank, level, amplitude, wavelength, phase, pointer) {
   const { x, y, size } = tank;
   const bottom = y + size;
+  const surfaceY = bottom - level;
+  const bendLimit = Math.min(12, level, size - level);
+  const surfaceAt = offset => surfaceY + amplitude * Math.sin(offset / wavelength * tau - phase) +
+    bendSurface(pointer, x + offset, surfaceY, bendLimit);
   ctx.beginPath();
   ctx.moveTo(x, bottom);
   for (let offset = 0; offset < size; offset += 2) {
-    ctx.lineTo(x + offset, bottom - level + amplitude * Math.sin(offset / wavelength * tau - phase));
+    ctx.lineTo(x + offset, surfaceAt(offset));
   }
-  ctx.lineTo(x + size, bottom - level + amplitude * Math.sin(size / wavelength * tau - phase));
+  ctx.lineTo(x + size, surfaceAt(size));
   ctx.lineTo(x + size, bottom);
   ctx.closePath();
   ctx.fill();
 }
 
-function drawLiquidFill(ctx, tank, elapsed, options, state, _size, still) {
+function drawLiquidFill(ctx, tank, elapsed, options, state, _size, still, pointer) {
   const { progress, progressSource, duration, amplitude, wavelength, showValue, color, backColor, opacity } = options;
   const level = tank.size * updateWaveLevel(state, elapsed, options, still) / 100;
   const { x, y, size, shape } = tank;
@@ -92,11 +102,11 @@ function drawLiquidFill(ctx, tank, elapsed, options, state, _size, still) {
     if (wave > 0) {
       ctx.fillStyle = backColor;
       ctx.globalAlpha = .72 * opacity;
-      drawLayer(ctx, tank, level, wave, wavelength, -phase + 2);
+      drawLayer(ctx, tank, level, wave, wavelength, -phase + 2, pointer);
     }
     ctx.fillStyle = color;
     ctx.globalAlpha = opacity;
-    drawLayer(ctx, tank, level, wave, wavelength, phase);
+    drawLayer(ctx, tank, level, wave, wavelength, phase, pointer);
   }
 
   if (showValue) {

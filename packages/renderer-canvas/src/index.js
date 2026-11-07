@@ -72,18 +72,13 @@ export function createCanvasRenderer(element, effect) {
       if (ratio) context.setTransform(canvas.width / width, 0, 0, canvas.height / height, 0, 0);
       prepare(options);
     },
-    render(elapsed, options, still, [x, y] = [0, 0]) {
+    render(elapsed, options, still, pointer) {
       if (!canvas.width || !canvas.height) return;
       context.clearRect(0, 0, size.width, size.height);
-      if (x || y) {
-        context.save();
-        context.translate(x, y);
-      }
-      try {
-        effect.draw(context, layout, elapsed, options, still ? staticState : state, size, still);
-      } finally {
-        if (x || y) context.restore();
-      }
+      const local = pointer?.strength ? {
+        x: pointer.x * size.width, y: pointer.y * size.height, strength: pointer.strength,
+      } : undefined;
+      effect.draw(context, layout, elapsed, options, still ? staticState : state, size, still, local);
     },
     destroy: () => canvas.remove(),
   };

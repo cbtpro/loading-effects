@@ -51,7 +51,7 @@ import EffectDemo, { EffectGallery } from '@site/src/components/EffectDemo';
 
 ### 粒子系统演示
 
-6 种粒子动效均使用 Canvas 2D。滚动离开视口时暂停绘制，返回后从原相位继续。粒子网络只比较相邻网格，并对连线两端同时应用数量上限。
+6 种粒子动效均使用 Canvas 2D。滚动离开视口时暂停绘制，返回后从原相位继续。粒子网络会将鼠标附近的粒子拉向指针，并用新位置重新计算连线。远处的粒子沿原轨迹漂移。网络只比较相邻网格，并对连线两端同时应用数量上限。
 
 <EffectGallery presets={['particle-flow', 'particle-convergence', 'particle-explosion', 'particle-orbit', 'particle-morph', 'particle-network']} />
 
