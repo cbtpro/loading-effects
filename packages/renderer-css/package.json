@@ -1,0 +1,11 @@
+{
+  "name": "@loading-effects/renderer-css",
+  "version": "0.2.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "CSS 渲染器",
+  "exports": "./src/index.js",
+  "dependencies": {
+    "@loading-effects/core": "workspace:*"
+  }
+}

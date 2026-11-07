@@ -1,0 +1,14 @@
+{
+  "name": "@loading-effects/react",
+  "version": "0.2.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "React 适配",
+  "exports": "./src/index.js",
+  "dependencies": {
+    "@loading-effects/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  }
+}

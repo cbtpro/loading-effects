@@ -1,0 +1,14 @@
+{
+  "name": "@loading-effects/vue",
+  "version": "0.2.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "Vue 适配",
+  "exports": "./src/index.js",
+  "dependencies": {
+    "@loading-effects/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  }
+}

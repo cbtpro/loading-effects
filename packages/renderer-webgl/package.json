@@ -1,0 +1,7 @@
+{
+  "name": "@loading-effects/renderer-webgl",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "WebGL 渲染器"
+}

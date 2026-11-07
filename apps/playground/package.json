@@ -1,0 +1,20 @@
+{
+  "name": "@loading-effects/app-playground",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "动效实验室",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@loading-effects/core": "workspace:*",
+    "@loading-effects/effects": "workspace:*",
+    "@loading-effects/renderer-canvas": "workspace:*",
+    "@loading-effects/renderer-css": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^8.3.6"
+  }
+}

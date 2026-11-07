@@ -1,0 +1,24 @@
+{
+  "name": "@loading-effects/example-frameworks",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@loading-effects/core": "workspace:*",
+    "@loading-effects/effects": "workspace:*",
+    "@loading-effects/react": "workspace:*",
+    "@loading-effects/renderer-canvas": "workspace:*",
+    "@loading-effects/renderer-css": "workspace:*",
+    "@loading-effects/vue": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.6"
+  }
+}

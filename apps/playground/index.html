@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Loading Effects · 动效实验室</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">LOADING EFFECTS / PLAYGROUND</p>
+        <h1>动效实验室</h1>
+        <p>向下滚动浏览动效。每张卡片保留自己的参数和演示进度。</p>
+      </header>
+      <nav class="group-nav" aria-label="动效分类">
+        <a href="#matrix-effects">点阵与波纹</a>
+        <a href="#progress-effects">进度反馈</a>
+        <a href="#geometry-effects">基础几何</a>
+      </nav>
+      <div id="effects"></div>
+    </main>
+    <template id="effect-card">
+      <article class="effect-card">
+        <div class="panel-heading">
+          <h3 data-part="title"></h3>
+          <span class="renderer" data-part="renderer"></span>
+        </div>
+        <p class="description" data-part="description"></p>
+        <div class="preview">
+          <div class="result" data-part="result" aria-busy="true">
+            <p data-part="ready" hidden>预览已就绪</p>
+          </div>
+          <div class="surface" data-part="surface"></div>
+          <div class="progress" data-part="progress"></div>
+        </div>
+        <div class="actions">
+          <button data-part="pause" type="button" aria-pressed="false">暂停</button>
+          <button data-part="trigger" type="button" hidden>从中心触发涟漪</button>
+          <button data-part="finish" type="button">模拟内容就绪</button>
+          <button data-part="reset" type="button">恢复默认</button>
+        </div>
+        <details class="settings">
+          <summary>参数与演示进度</summary>
+          <div class="settings-grid">
+            <div class="controls" data-part="controls"></div>
+            <div>
+              <label class="check"><input data-part="static" type="checkbox"> 强制静态预览</label>
+              <p data-part="motion" class="hint"></p>
+              <fieldset>
+                <legend>演示进度</legend>
+                <label>进度模式
+                  <select data-part="progress-mode">
+                    <option value="unknown">未知进度</option>
+                    <option value="actual">确定进度</option>
+                    <option value="estimated">估算进度</option>
+                  </select>
+                </label>
+                <label data-part="progress-label">进度值 <output data-part="progress-output">0%</output></label>
+                <input data-part="progress-value" type="range" min="0" max="100" value="0" disabled>
+              </fieldset>
+            </div>
+          </div>
+        </details>
+        <details class="code-example" data-part="code-example">
+          <summary>查看代码</summary>
+          <div class="code-toolbar">
+            <div class="code-choices" role="group" aria-label="框架">
+              <button type="button" data-framework="vue" aria-pressed="true">Vue</button>
+              <button type="button" data-framework="react" aria-pressed="false">React</button>
+            </div>
+            <div class="code-choices" role="group" aria-label="语言">
+              <button type="button" data-language="js" aria-pressed="true">JS</button>
+              <button type="button" data-language="ts" aria-pressed="false">TS</button>
+            </div>
+            <span class="code-filename" data-part="code-filename"></span>
+            <button type="button" data-part="copy-code">复制代码</button>
+          </div>
+          <pre class="code-block" tabindex="0"><code data-part="code"></code></pre>
+          <div class="hint" data-part="copy-status" role="status"></div>
+        </details>
+        <div data-part="status" class="sr-only" role="status"></div>
+      </article>
+    </template>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

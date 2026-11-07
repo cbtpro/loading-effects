@@ -1,0 +1,19 @@
+{
+  "name": "loading-effects",
+  "version": "0.2.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10 <11"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/react": "^19.3.0"
+  },
+  "scripts": {
+    "test:bundle": "pnpm --filter @loading-effects/example-frameworks build && node tests/bundle-check.js",
+    "test:e2e": "playwright test"
+  }
+}

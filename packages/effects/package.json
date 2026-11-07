@@ -1,0 +1,11 @@
+{
+  "name": "@loading-effects/effects",
+  "version": "0.2.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "动效定义、参数 Schema 与预设",
+  "exports": "./src/index.js",
+  "dependencies": {
+    "@loading-effects/core": "workspace:*"
+  }
+}

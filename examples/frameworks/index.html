@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Loading Effects · React 与 Vue 示例</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; }
+      main { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
+      section { padding: 1rem; border: 1px solid #cbd5e1; border-radius: .75rem; }
+      button { margin: 0 .5rem .75rem 0; }
+      [role=status] { height: 160px; border: 1px solid #dbeafe; }
+    </style>
+  </head>
+  <body>
+    <h1>React 与 Vue 接入示例</h1>
+    <main>
+      <section id="react"><h2>React</h2><div id="react-app"></div></section>
+      <section id="vue"><h2>Vue</h2><div id="vue-app"></div></section>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

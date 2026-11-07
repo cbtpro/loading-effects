@@ -1,0 +1,8 @@
+{
+  "name": "@loading-effects/core",
+  "version": "0.2.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "生命周期、时间轴与渲染器契约",
+  "exports": "./src/index.js"
+}
