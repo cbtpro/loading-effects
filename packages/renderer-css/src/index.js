@@ -33,11 +33,6 @@ export function createCssRenderer(element, effect) {
         ? (elapsed % options.duration) / options.duration
         : Math.min(1, elapsed / options.duration);
       draw(progress, options, still, pointer);
-      if (!effect.pointerPaint) {
-        const strength = pointer?.strength ?? 0;
-        const brightness = effect.taskProgress ? .15 : .28;
-        surface.style.filter = strength ? `brightness(${1 + brightness * strength})` : '';
-      }
     },
     destroy: () => surface.remove(),
   };

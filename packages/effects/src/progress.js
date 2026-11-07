@@ -1,4 +1,4 @@
-import { bendSurface } from './pointer.js';
+import { bendSurface, pointerAlong } from './pointer.js';
 
 const progressSchema = {
   progress: { default: null, min: 0, max: 100 },
@@ -43,7 +43,7 @@ export const circularProgress = {
     wrapper.append(svg, value);
     surface.append(wrapper);
 
-    return (phase, options, still) => {
+    return (phase, options, still, pointer) => {
       const { progress, progressSource, size, strokeWidth, startAngle, showValue, transition } = options;
       const unknown = progress === null;
       svg.setAttribute('width', size);
@@ -55,6 +55,7 @@ export const circularProgress = {
         circle.setAttribute('stroke-width', strokeWidth);
       }
       arc.style.transition = unknown || still || options.paused ? 'none' : `stroke-dashoffset ${transition}ms ease-out`;
+      arc.style.filter = pointer?.strength ? `drop-shadow(0 0 ${4 * pointer.strength}px currentColor)` : '';
       arc.setAttribute('stroke-dasharray', '100 100');
       arc.style.strokeDashoffset = String(100 - (unknown ? 24 : progress));
       svg.style.transform = `rotate(${startAngle + (unknown ? phase * 360 : 0)}deg)`;
@@ -96,7 +97,7 @@ export const gradientProgress = {
     track.append(fill);
     surface.append(track);
 
-    return (phase, { progress, height, cornerRadius, endColor, shimmer }, still) => {
+    return (phase, { progress, height, cornerRadius, endColor, shimmer }, still, pointer) => {
       const unknown = progress === null;
       track.style.height = `${height}px`;
       track.style.borderRadius = `${cornerRadius}px`;
@@ -105,8 +106,15 @@ export const gradientProgress = {
       fill.style.background = `linear-gradient(90deg, currentColor, ${endColor})`;
       fill.style.transform = unknown ? `translateX(${(phase * 128 - 28) / .28}%)` : '';
       if (unknown && still) fill.style.transform = 'translateX(125%)';
-      light.hidden = unknown || !shimmer || still;
-      light.style.transform = `translateX(${phase * 390 - 100}%)`;
+      const strength = pointer?.strength ?? 0;
+      const sweep = phase * 390 - 100;
+      const hover = strength && !unknown
+        ? Math.min(1, pointerAlong(pointer, surface, track) * 100 / Math.max(progress, 1)) * (100 / .35) - 50
+        : sweep;
+      fill.style.filter = unknown && strength ? `brightness(${1 + .25 * strength})` : '';
+      light.hidden = unknown || still || (!shimmer && !strength);
+      light.style.opacity = shimmer ? '1' : String(strength);
+      light.style.transform = `translateX(${sweep + (hover - sweep) * strength}%)`;
     };
   },
 };
@@ -145,8 +153,11 @@ export const segmentedProgress = {
       return fill;
     });
     surface.append(track);
-    return (phase, { progress, gap, partial }) => {
+    return (phase, { progress, gap, partial }, _still, pointer) => {
       track.style.gap = `min(${gap}px, 2%)`;
+      const hovered = pointer?.strength
+        ? Math.min(segments - 1, Math.floor(pointerAlong(pointer, surface, track) * segments))
+        : -1;
       const active = Math.floor(phase * segments);
       const filled = progress * segments / 100;
       fills.forEach((fill, index) => {
@@ -154,6 +165,9 @@ export const segmentedProgress = {
           ? Number(index === active)
           : Math.min(1, Math.max(0, (partial ? filled : Math.floor(filled)) - index));
         fill.style.width = `${amount * 100}%`;
+        fill.parentElement.style.boxShadow = index === hovered
+          ? `inset 0 0 0 1px color-mix(in srgb, currentColor ${pointer.strength * 100}%, transparent)`
+          : '';
       });
     };
   },
@@ -165,7 +179,6 @@ export const stepProgress = {
   description: '按宿主提供的阶段标记已完成、当前与待开始的步骤。',
   renderer: 'css',
   stageProgress: true,
-  pointerPaint: true,
   layoutFields: ['steps'],
   schema: {
     color: progressSchema.color,

@@ -23,7 +23,7 @@ function dot(surface, diameter) {
 
 function geometry(id, title, description, schema, layoutFields, mount) {
   return {
-    id, title, description, renderer: 'css', layoutFields, pointerPaint: true,
+    id, title, description, renderer: 'css', layoutFields,
     mount(surface, options) {
       const draw = mount(surface, options);
       return (phase, next, still, pointer) => {

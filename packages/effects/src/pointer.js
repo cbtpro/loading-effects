@@ -9,3 +9,10 @@ export function pointerWeight(pointer, x, y, radius) {
 export function bendSurface(pointer, x, y, limit) {
   return pointerWeight(pointer, x, y, 84) * Math.max(-limit, Math.min(limit, (pointer?.y ?? y) - y));
 }
+
+// Map a surface-relative pointer to a centered track or label.
+export function pointerAlong(pointer, surface, element) {
+  const width = element.offsetWidth;
+  if (!width) return .5;
+  return Math.max(0, Math.min(1, .5 + (pointer.x - .5) * surface.clientWidth / width));
+}

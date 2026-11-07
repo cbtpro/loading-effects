@@ -1,4 +1,5 @@
 import { splitGraphemes } from '@loading-effects/core';
+import { pointerAlong } from './pointer.js';
 
 const base = {
   text: { type: 'text', default: 'Loading', maxLength: 48, label: '文字' },
@@ -33,9 +34,13 @@ export const typingDots = {
       node.append(dot);
       return dot;
     });
-    return (phase, _options, still) => {
+    return (phase, _options, still, pointer) => {
       const shown = still ? maxDots : Math.min(maxDots, Math.floor(phase * (maxDots + 1)));
-      dots.forEach((dot, index) => { dot.style.visibility = index < shown ? 'visible' : 'hidden'; });
+      const strength = pointer?.strength ?? 0;
+      dots.forEach((dot, index) => {
+        dot.style.visibility = index < shown || strength > 0 ? 'visible' : 'hidden';
+        dot.style.opacity = index < shown ? '1' : String(strength * (1 - index / maxDots) * .65);
+      });
     };
   },
 };
@@ -60,10 +65,13 @@ export const characterWave = {
       node.append(char);
       return char;
     });
-    return (phase, { amplitude, stagger, duration }, still) => {
+    return (phase, { amplitude, stagger, duration }, still, pointer) => {
+      const strength = pointer?.strength ?? 0;
+      const center = strength ? pointerAlong(pointer, surface, node) * chars.length : 0;
       chars.forEach((char, index) => {
         const angle = (phase - index * stagger / duration) * Math.PI * 2;
-        const lift = still ? 0 : (1 - Math.cos(angle)) * amplitude / 2;
+        const boost = Math.max(0, 1 - Math.abs(center - index - .5) / 2) * strength;
+        const lift = still ? 0 : ((1 - Math.cos(angle)) / 2 + .75 * boost) * amplitude;
         char.style.transform = `translateY(${-lift}px)`;
       });
     };
@@ -75,7 +83,6 @@ export const textShimmer = {
   title: '文字流光',
   description: '高光沿文字表面移动，字形与文字宽度保持稳定。',
   renderer: 'css',
-  pointerPaint: true,
   layoutFields: ['text'],
   schema: {
     ...base,
@@ -90,7 +97,7 @@ export const textShimmer = {
     return (phase, { color, highlightWidth, direction }, still, pointer) => {
       const half = highlightWidth * 50;
       const moving = phase * (100 + 2 * half) - half;
-      const center = moving + ((pointer?.x ?? .5) * 100 - moving) * (pointer?.strength ?? 0);
+      const center = pointer?.strength ? moving + (pointerAlong(pointer, surface, node) * 100 - moving) * pointer.strength : moving;
       node.style.color = still || !node.style.backgroundClip ? color : 'transparent';
       node.style.backgroundImage = still ? 'none' :
         `linear-gradient(${90 + direction}deg, ${color} ${center - half}%, color-mix(in srgb, ${color}, white 48%) ${center}%, ${color} ${center + half}%)`;
@@ -127,11 +134,13 @@ export const scrambleText = {
       node.append(slot);
       return { value, glyph };
     });
-    return (phase, { duration, tick, seed }, still) => {
+    return (phase, { duration, tick, seed }, still, pointer) => {
+      const strength = pointer?.strength ?? 0;
+      const hovered = strength ? Math.min(slots.length - 1, Math.floor(pointerAlong(pointer, surface, node) * slots.length)) : -1;
       const step = Math.floor(phase * duration / tick);
       slots.forEach(({ value, glyph }, index) => {
         const state = Math.imul(seed + index * 31 + step * 101, 0x9e3779b1);
-        const next = still || index < step || !value.trim()
+        const next = still || index < step || (index === hovered && strength > .4) || !value.trim()
           ? value : pool[(state >>> 0) % pool.length];
         if (glyph.textContent !== next) glyph.textContent = next;
       });

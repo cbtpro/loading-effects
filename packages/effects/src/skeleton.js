@@ -43,7 +43,7 @@ const breathe = phase => .5 - .5 * Math.cos(phase * Math.PI * 2);
 
 function skeletonEffect(id, title, description, schema, paint) {
   return {
-    id, title, description, renderer: 'css', skeleton: true, pointerPaint: true, layoutFields: ['layout'],
+    id, title, description, renderer: 'css', skeleton: true, layoutFields: ['layout'],
     schema: { ...base, ...schema },
     mount(surface, options) {
       const regions = skeletonRows(surface, options.layout);
@@ -121,7 +121,10 @@ export const progressiveReveal = {
       entry.region.append(text);
       return { ...entry, text };
     });
-    return (_, options, still) => {
+    return (_, options, still, pointer) => {
+      const hovered = pointer?.strength
+        ? regions[Math.min(regions.length - 1, Math.floor(pointer.y * regions.length))]
+        : null;
       for (const { region, placeholder, text, key } of regions) {
         const ready = options.readyKeys.includes(key);
         region.dataset.ready = String(ready);
@@ -129,7 +132,7 @@ export const progressiveReveal = {
         placeholder.style.borderRadius = `${options.cornerRadius}px`;
         placeholder.style.transition = `opacity ${duration}ms ease`;
         text.style.transition = placeholder.style.transition;
-        placeholder.style.opacity = ready ? '0' : '.65';
+        placeholder.style.opacity = ready ? '0' : String(.65 + (hovered?.region === region ? .25 * pointer.strength : 0));
         text.style.opacity = ready ? '1' : '0';
         text.setAttribute('aria-hidden', String(!ready));
         const content = ready ? options.content[key] ?? '' : '';

@@ -536,3 +536,22 @@ test('hover highlights a nearby stage without changing the selected step', async
   await stage.getByText('参数与演示进度', { exact: true }).hover();
   await expect.poll(() => first.evaluate(node => node.style.boxShadow)).toBe('');
 });
+
+test('segmented progress highlights only the hovered segment without changing its fill', async ({ page }) => {
+  await page.goto('/');
+  const card = page.locator('#segmented-progress');
+  await card.getByText('参数与演示进度', { exact: true }).click();
+  await card.getByLabel('进度模式').selectOption('actual');
+  await card.getByLabel('进度值', { exact: false }).fill('93');
+  const segments = card.locator('.surface > div > div > div');
+  const last = segments.last();
+  await last.hover({ force: true });
+  const highlighted = () => segments.evaluateAll(nodes => nodes.map(node => Boolean(node.style.boxShadow)));
+  await expect.poll(highlighted).toEqual([...Array(9).fill(false), true]);
+  await expect.poll(() => last.locator('div').evaluate(node => parseFloat(node.style.width))).toBeCloseTo(30);
+  await expect(card.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '93');
+  await segments.first().hover({ force: true });
+  await expect.poll(highlighted).toEqual([true, ...Array(9).fill(false)]);
+  await card.getByText('参数与演示进度', { exact: true }).hover();
+  await expect.poll(highlighted).toEqual(Array(10).fill(false));
+});
