@@ -220,8 +220,8 @@ export const waveSchema = {
 
 export const createWaveState = () => ({ target: null, level: 0, from: 0, start: 0 });
 
-export function drawWaveTank(ctx, tank, elapsed, options, state, _size, still) {
-  const { progress, progressSource, duration, transition, amplitude, wavelength, showValue, color, opacity } = options;
+export function updateWaveLevel(state, elapsed, options, still) {
+  const { progress, transition } = options;
   if (progress !== state.target) {
     state.from = state.target === null ? progress ?? 0 : state.level;
     state.target = progress;
@@ -229,13 +229,18 @@ export function drawWaveTank(ctx, tank, elapsed, options, state, _size, still) {
   }
   const fraction = still || options.paused || transition === 0 ? 1 : Math.min(1, (elapsed - state.start) / transition);
   state.level = progress === null ? 0 : state.from + (progress - state.from) * fraction;
+  return state.level;
+}
+
+export function drawWaveTank(ctx, tank, elapsed, options, state, _size, still) {
+  const { progress, progressSource, duration, amplitude, wavelength, showValue, color, opacity } = options;
+  const levelPercent = updateWaveLevel(state, elapsed, options, still);
   const { x, y, width, height } = tank;
   const radius = Math.min(8, height / 2, width / 2);
   const phase = elapsed / duration * Math.PI * 2;
   ctx.save();
   ctx.beginPath();
-  if (tank.shape === 'circle') ctx.arc(x + width / 2, y + height / 2, width / 2, 0, Math.PI * 2);
-  else ctx.roundRect(x, y, width, height, radius);
+  ctx.roundRect(x, y, width, height, radius);
   ctx.clip();
   ctx.fillStyle = color;
   ctx.globalAlpha = .14 * opacity;
@@ -245,8 +250,8 @@ export function drawWaveTank(ctx, tank, elapsed, options, state, _size, still) {
     const band = width * .28;
     const left = still ? x + (width - band) / 2 : x - band + (width + band) * ((elapsed % duration) / duration);
     ctx.fillRect(left, y + height / 2 - 2, band, 4);
-  } else if (state.level > 0) {
-    const level = height * state.level / 100;
+  } else if (levelPercent > 0) {
+    const level = height * levelPercent / 100;
     const wave = Math.min(amplitude, level, height - level);
     const bottom = y + height;
     ctx.beginPath();

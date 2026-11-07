@@ -12,7 +12,7 @@ const registry = {
 };
 const defaults = Object.freeze({});
 
-export default function EffectDemo({ id, options = defaults, completion = false }) {
+export default function EffectDemo({ id, options = defaults, completion = false, progressControl = false }) {
   const effect = registry.effects[id];
   if (!effect) throw new Error(`Unknown documentation demo: ${id}`);
 
@@ -21,6 +21,8 @@ export default function EffectDemo({ id, options = defaults, completion = false 
   const [ready, setReady] = useState(false);
   const [readyKeys, setReadyKeys] = useState(options.readyKeys ?? []);
   const [activeStep, setActiveStep] = useState(options.activeStep ?? 0);
+  const [progress, setProgress] = useState(options.progress ?? 0);
+  const [unknown, setUnknown] = useState(options.progress == null);
   const ripple = id === 'interactive-ripple';
   const interactive = !effect.stageProgress && !effect.reveal;
   const regions = effect.schema.readyKeys?.itemChoices ?? [];
@@ -29,6 +31,7 @@ export default function EffectDemo({ id, options = defaults, completion = false 
     ...options,
     ...(effect.reveal ? { readyKeys } : {}),
     ...(effect.stageProgress ? { activeStep } : {}),
+    ...(progressControl ? { progress: unknown ? null : progress } : {}),
     paused,
   };
 
@@ -55,6 +58,21 @@ export default function EffectDemo({ id, options = defaults, completion = false 
           </>
         )}
       </div>
+      {progressControl && (
+        <div className={styles.progressControls}>
+          <label>
+            演示进度
+            <input type="range" min="0" max="100" value={progress} disabled={unknown}
+              aria-valuetext={`${progress}%`}
+              onChange={event => setProgress(event.target.valueAsNumber)} />
+            <output aria-hidden="true">{unknown ? '未知' : `${progress}%`}</output>
+          </label>
+          <label>
+            <input type="checkbox" checked={unknown} onChange={event => setUnknown(event.target.checked)} />
+            未知进度
+          </label>
+        </div>
+      )}
       <figcaption className={styles.caption}>
         <span>{effect.title}</span>
         <div className={styles.actions}>

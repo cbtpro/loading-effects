@@ -423,3 +423,36 @@ test('WebGL fluid shaders draw pixels and recover from context loss', async ({ p
   await expect(canvas).toBeVisible();
   expect((await capture('ink-diffusion')).count).toBeGreaterThan(50);
 });
+
+test('liquid fill layers waves only while the task progress is known and motion is enabled', async ({ page }) => {
+  await page.addInitScript(() => {
+    const prototype = CanvasRenderingContext2D.prototype;
+    const clear = prototype.clearRect;
+    const fill = prototype.fill;
+    prototype.clearRect = function (...args) {
+      if (this.canvas.closest('#liquid-fill')) window.liquidPaints = [];
+      return clear.apply(this, args);
+    };
+    prototype.fill = function (...args) {
+      if (this.canvas.closest('#liquid-fill')) window.liquidPaints?.push(this.fillStyle);
+      return fill.apply(this, args);
+    };
+  });
+  await page.goto('/');
+  const card = page.locator('#liquid-fill');
+  await card.getByText('参数与演示进度', { exact: true }).click();
+  await card.getByLabel('显示数值', { exact: true }).uncheck();
+  await card.getByLabel('进度模式').selectOption('estimated');
+  await card.getByLabel('进度值', { exact: false }).fill('63');
+  await card.locator('.preview').scrollIntoViewIfNeeded();
+  await expect(card.getByRole('progressbar')).toHaveAttribute('aria-valuetext', '预计 63%');
+  const paints = () => page.evaluate(() => window.liquidPaints);
+  await expect.poll(paints).toEqual(['#74a7fa', '#2359be']);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(paints).toEqual(['#2359be']);
+  await card.getByLabel('进度模式').selectOption('unknown');
+  await card.locator('.preview').scrollIntoViewIfNeeded();
+  await expect(card.getByRole('progressbar')).toHaveCount(0);
+  await expect.poll(paints).toEqual(['#2359be', '#2359be', '#2359be']);
+});
