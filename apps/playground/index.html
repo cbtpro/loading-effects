@@ -6,30 +6,27 @@
     <title>Loading Effects · 动效实验室</title>
   </head>
   <body>
-    <main>
-      <header>
+    <div class="playground">
+      <header class="page-heading">
         <p class="eyebrow">LOADING EFFECTS / PLAYGROUND</p>
         <h1>动效实验室</h1>
-        <p>向下滚动浏览动效。每张卡片保留自己的参数和演示进度。</p>
+        <p class="intro">浏览预设、实时调参，并复制当前动效的接入代码。</p>
       </header>
       <nav class="group-nav" aria-label="动效分类">
-        <a href="#matrix-effects">点阵与波纹</a>
-        <a href="#progress-effects">进度反馈</a>
-        <a href="#particle-effects">粒子系统</a>
-        <a href="#skeleton-effects">骨架占位</a>
-        <a href="#liquid-effects">流体与液态</a>
-        <a href="#text-effects">文字动效</a>
-        <a href="#geometry-effects">基础几何</a>
+        <p class="nav-heading" aria-hidden="true">动效分类</p>
+        <ul class="nav-list"></ul>
       </nav>
-      <div id="effects"></div>
-    </main>
+      <main id="effects" aria-label="动效预览"></main>
+    </div>
     <template id="effect-card">
       <article class="effect-card">
-        <div class="panel-heading">
-          <h3 data-part="title"></h3>
-          <span class="renderer" data-part="renderer"></span>
+        <div class="card-copy">
+          <div class="panel-heading">
+            <h3 data-part="title"></h3>
+            <span class="renderer" data-part="renderer"></span>
+          </div>
+          <p class="description" data-part="description"></p>
         </div>
-        <p class="description" data-part="description"></p>
         <div class="preview">
           <div class="result" data-part="result" aria-busy="true">
             <p data-part="ready" hidden>预览已就绪</p>

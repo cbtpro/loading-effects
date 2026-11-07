@@ -1,5 +1,43 @@
 import { expect, test } from '@playwright/test';
 
+test('right sidebar marks the current group with a dashed SVG and follows scrolling', async ({ page }) => {
+  await page.goto('/');
+  const nav = page.getByRole('navigation', { name: '动效分类' });
+  const current = nav.locator('[aria-current="location"]');
+  await expect(nav.getByRole('link')).toHaveCount(7);
+  await expect(current).toHaveText(/点阵与波纹/);
+  const marker = current.locator('svg');
+  await expect(marker).toBeVisible();
+  await expect(marker.locator('path')).toHaveAttribute('stroke-dasharray', /\S/);
+  await expect(nav.getByRole('link', { name: '基础几何' }).locator('svg')).toBeHidden();
+  const sidebar = await nav.boundingBox();
+  const preview = await page.locator('#dot-matrix-wave').boundingBox();
+  expect(sidebar.x).toBeGreaterThan(preview.x + preview.width);
+
+  await nav.getByRole('link', { name: '基础几何' }).click();
+  await expect(page).toHaveURL(/#geometry-effects$/);
+  await expect(current).toHaveText(/基础几何/);
+  expect((await nav.boundingBox()).y).toBeCloseTo(16);
+
+  await page.locator('#particle-effects').evaluate(section => section.scrollIntoView());
+  await expect(current).toHaveText(/粒子系统/);
+  await expect(nav.locator('[aria-current]')).toHaveCount(1);
+});
+
+test('narrow view keeps category links accessible without covering anchor targets', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/#particle-network');
+  const nav = page.getByRole('navigation', { name: '动效分类' });
+  const current = nav.locator('[aria-current="location"]');
+  await expect(current).toHaveText(/粒子系统/);
+  await nav.getByRole('link', { name: '基础几何' }).click();
+  await expect(current).toHaveText(/基础几何/);
+  const heading = await page.getByRole('heading', { name: '基础几何' }).boundingBox();
+  const menu = await nav.boundingBox();
+  expect(heading.y).toBeGreaterThan(menu.y + menu.height);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+});
+
 test('card configuration, completion and rendering stay independent', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.effect-card')).toHaveCount(38);

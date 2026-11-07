@@ -12,6 +12,7 @@ import { createCssRenderer } from '@loading-effects/renderer-css';
 import { createCanvasRenderer } from '@loading-effects/renderer-canvas';
 import { createWebGLRenderer } from '@loading-effects/renderer-webgl';
 import { buildExample } from './code-example.js';
+import { mountGroupNav } from './group-nav.js';
 import './style.css';
 
 const groups = [
@@ -375,6 +376,7 @@ function mountCard(card, effect) {
 
 const cleanups = [];
 const list = document.querySelector('#effects');
+const sections = [];
 for (const [id, title, presets] of groups) {
   const section = document.createElement('section');
   const heading = document.createElement('h2');
@@ -383,6 +385,7 @@ for (const [id, title, presets] of groups) {
   heading.textContent = title;
   section.append(heading);
   list.append(section);
+  sections.push({ section, title, count: presets.length });
 
   for (const effect of presets) {
     const card = template.content.firstElementChild.cloneNode(true);
@@ -390,6 +393,7 @@ for (const [id, title, presets] of groups) {
     cleanups.push(mountCard(card, effect));
   }
 }
+cleanups.push(mountGroupNav(document.querySelector('.group-nav'), sections));
 
 window.addEventListener('pagehide', event => {
   if (!event.persisted) cleanups.forEach(cleanup => cleanup());
