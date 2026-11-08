@@ -13,6 +13,7 @@
     "@types/react": "^19.3.0"
   },
   "scripts": {
+    "build:pages": "pnpm --filter @loading-effects/app-docs build && pnpm --filter @loading-effects/app-playground build --base ./ && node -e \"require('node:fs').cpSync('apps/playground/dist', 'apps/docs/build/playground', { recursive: true })\"",
     "test:bundle": "pnpm --filter @loading-effects/example-frameworks build && node tests/bundle-check.js",
     "test:e2e": "playwright test"
   }

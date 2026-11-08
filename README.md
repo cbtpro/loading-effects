@@ -1,7 +1,7 @@
 # Loading Effects
 
 [![Regression Checks](https://github.com/cbtpro/loading-effects/actions/workflows/v01-checks.yml/badge.svg?branch=main)](https://github.com/cbtpro/loading-effects/actions/workflows/v01-checks.yml)
-[![Documentation Pages](https://github.com/cbtpro/loading-effects/actions/workflows/docs-pages.yml/badge.svg?branch=main)](https://github.com/cbtpro/loading-effects/actions/workflows/docs-pages.yml)
+[![GitHub Pages](https://github.com/cbtpro/loading-effects/actions/workflows/docs-pages.yml/badge.svg?branch=main)](https://github.com/cbtpro/loading-effects/actions/workflows/docs-pages.yml)
 
 面向 Web 应用的可配置、跨框架 Loading 动效库。规划覆盖按钮和表单等待、全画布生成、真实任务进度与内容占位。
 
@@ -13,7 +13,7 @@
 pnpm install --frozen-lockfile
 ```
 
-Playground 已接入 38 种预设。`v1.0.0-alpha.3` 增加融合液滴、流体丝带和墨水扩散，补齐流体与液态分组。
+[在线 Playground](https://blog.chenbitao.com/loading-effects/playground/) 已接入 38 种预设。`v1.0.0-alpha.3` 增加融合液滴、流体丝带和墨水扩散，补齐流体与液态分组。
 
 ```sh
 pnpm --filter @loading-effects/app-playground dev --port 4173
